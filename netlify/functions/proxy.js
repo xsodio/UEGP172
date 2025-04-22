@@ -1,5 +1,5 @@
 export async function handler(event, context) {
-  const url = 'https://script.google.com/macros/s/AKfycbyp5MjUCeMLY6i2LTcfFLFnWCWl3mi1AJojfaJjO1tZGLOFFSnBhqKXbgcTuJEC3eUqbg/exec';
+  const url = process.env.GAS_URL; // ← Usa la variable de entorno
 
   try {
     const response = await fetch(url);
@@ -8,7 +8,7 @@ export async function handler(event, context) {
     return {
       statusCode: 200,
       headers: {
-        'Access-Control-Allow-Origin': '*',  // 🔥 CORS LIBERADO
+        'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
@@ -16,11 +16,7 @@ export async function handler(event, context) {
   } catch (error) {
     return {
       statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ error: error.message }),
+      body: JSON.stringify({ error: "Error en el servidor" }),
     };
   }
 }
