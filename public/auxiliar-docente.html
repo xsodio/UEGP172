@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma Preceptor - E.E.T. 172</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Base Styles & Font */
+        html, body, #root { height: 100%; margin: 0; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background-color: #f3f4f6; /* gray-100 */ }
+        #root { display: flex; }
+
+        /* Custom Scrollbar for main content */
+        .main-content-area::-webkit-scrollbar { width: 6px; height: 6px; }
+        .main-content-area::-webkit-scrollbar-track { background: #e5e7eb; border-radius: 10px; } /* gray-200 */
+        .main-content-area::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 10px; } /* gray-400 */
+        .main-content-area::-webkit-scrollbar-thumb:hover { background: #6b7280; } /* gray-500 */
+
+        /* Focus visible */
+        *:focus-visible { outline: 3px solid #60a5fa; outline-offset: 1px; border-radius: 6px; } /* blue-400 */
+
+        /* Smooth transitions */
+        .transition-smooth { transition: all 0.2s ease-in-out; }
+
+        /* Loading dots */
+        @keyframes loadingDots { 0%, 80%, 100% { opacity: 0; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+        .loading-dot { animation: loadingDots 1.4s infinite ease-in-out both; }
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; } .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        /* Table Styling (consistent) */
+        .data-table th, .data-table td { padding: 0.65rem 0.85rem; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 0.8rem; } /* gray-200, smaller font */
+        .data-table th { background-color: #f9fafb; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.05em; } /* gray-50, gray-700 */
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td { background-color: #f9fafb; } /* gray-50 */
+        .data-table td.grade-cell { text-align: center; font-weight: 500; }
+        .data-table td.grade-placeholder { color: #9ca3af; font-style: italic; } /* gray-400 */
+
+        /* Attendance Status Colors & Radio buttons */
+        .status-presente { color: #16a34a; font-weight: 500;} .status-ausente { color: #dc2626; font-weight: 500;} .status-tarde { color: #f97316; font-weight: 500;} .status-justificado { color: #0ea5e9; font-weight: 500;}
+        .custom-radio { appearance: none; width: 1.15rem; height: 1.15rem; border: 2px solid #9ca3af; border-radius: 50%; display: inline-block; position: relative; cursor: pointer; margin-right: 0.25rem; vertical-align: middle; transition: all 0.2s ease; }
+        .custom-radio:checked { border-color: #3b82f6; background-color: #3b82f6; } /* blue-500 */
+        .custom-radio:checked::after { content: ''; width: 0.45rem; height: 0.45rem; background-color: white; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .custom-radio:focus-visible { outline: 2px solid #60a5fa; outline-offset: 1px; }
+        .custom-radio-label { margin-right: 0.5rem; cursor: pointer; vertical-align: middle; font-size: 0.875rem; }
+
+        /* Feed card styles */
+        .feed-card { background-color: white; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+        .feed-card-header { display: flex; align-items: center; margin-bottom: 0.75rem; }
+        .feed-card-icon { width: 2.5rem; height: 2.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem; color: white; flex-shrink: 0; }
+        .feed-card-title { font-weight: 600; color: #1f2937; /* gray-800 */ }
+        .feed-card-time { font-size: 0.75rem; color: #6b7280; /* gray-500 */ margin-left: auto; white-space: nowrap; padding-left: 0.5rem; }
+        .feed-card-content { font-size: 0.875rem; color: #4b5563; /* gray-600 */ line-height: 1.4; }
+        .feed-card-actions { margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .feed-action-button { background-color: #f3f4f6; /* gray-100 */ color: #374151; /* gray-700 */ padding: 0.3rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; border: 1px solid #e5e7eb; /* gray-200 */ cursor: pointer; transition: background-color 0.2s; }
+        .feed-action-button:hover { background-color: #e5e7eb; /* gray-200 */ }
+
+        /* Sidebar active link */
+        .sidebar-link-active { background-color: #dbeafe; /* blue-100 */ color: #1d4ed8; /* blue-700 */ font-weight: 600; }
+
+        /* AI Assistant Pulse Animation */
+         @keyframes eetPulse {
+             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); } /* blue-500 */
+             70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+         }
+        .animate-eet-pulse { animation: eetPulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1); }
+        .group:hover .animate-eet-pulse, button:focus-visible .animate-eet-pulse { animation: none; }
+
+        /* AI Chat Modal Fast Fade-in & Bubble Pop */
+        @keyframes fadeInFast { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in-fast { animation: fadeInFast 0.3s ease-out forwards; }
+        @keyframes bubblePop { 0% { opacity: 0; transform: scale(0.7) translateY(10px); } 60% { opacity: 1; transform: scale(1.08) translateY(-2px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        .animate-bubble-pop { animation: bubblePop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div id="loading-indicator" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; font-family: 'Inter', sans-serif; color: #1e3a8a;">
+             <div class="flex space-x-1"> <div class="w-3 h-3 bg-blue-600 rounded-full loading-dot"></div> <div class="w-3 h-3 bg-blue-600 rounded-full loading-dot"></div> <div class="w-3 h-3 bg-blue-600 rounded-full loading-dot"></div> </div>
+             <p style="margin-top: 15px; font-size: 1rem; font-weight: 500;">Cargando plataforma...</p>
+        </div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef, Fragment } = React;
+
+        // --- Font Awesome Icons (using class names) ---
+        const Icon = ({ name, className = "" }) => <i className={`fa-solid ${name} ${className}`} aria-hidden="true"></i>;
+        // Specific Icons needed for AI Chat
+        const Bot = () => <Icon name="fa-robot" className="w-7 h-7 transition-transform duration-300 ease-out group-hover:rotate-[15deg]" />;
+        const Send = () => <Icon name="fa-paper-plane" />;
+        const X = () => <Icon name="fa-xmark" className="w-6 h-6" />;
+
+        // --- Simulated Data ---
+        const hardcodedPreceptorData = { /* ... same as before ... */
+             nombre: "Juan Pablo Chamorro", rol: "Preceptor", dni: "39.776.947", email: "jpchamorro.preceptoria@eet172.edu.ar", telefono: "362-4521452", fechaAlta: "18/04/2018", cursosACargo: "1°, 2°, 3° y 4° Año", avatarUrl: null
+        };
+        const hardcodedClassesData = [ /* ... same as before ... */
+             { id: "4A_TIP", name: "4° Año 'A' - Téc. Industrias de Procesos", year: 4, division: "A", spec: "TIP" }, { id: "4B_TIP", name: "4° Año 'B' - Téc. Industrias de Procesos", year: 4, division: "B", spec: "TIP" }, { id: "5A_TEE", name: "5° Año 'A' - Téc. Electrónico", year: 5, division: "A", spec: "TEE" }, { id: "6A_TIEA", name: "6° Año 'A' - Téc. Informático", year: 6, division: "A", spec: "TIEA" }
+        ];
+        const hardcodedStudentsList = [ /* ... same as before ... */
+             { id: "S001", name: "Gómez, Ana Laura", dni: "45.123.456", classId: "4A_TIP", tutorName: "Roberto Gómez", tutorPhone: "362-4112233", status: null, attendance: 95 }, { id: "S002", name: "Pérez, Juan Carlos", dni: "45.234.567", classId: "4A_TIP", tutorName: "María López", tutorPhone: "362-4223344", status: null, attendance: 78 }, { id: "S003", name: "Martínez, Sofía", dni: "45.345.678", classId: "4A_TIP", tutorName: "Carlos Martínez", tutorPhone: "362-4334455", status: null, attendance: 88 }, { id: "S009", name: "Alegres, Erik Uriel", dni: "44.355.170", classId: "4A_TIP", tutorName: "Ramona Alegre", tutorPhone: "362-4551144", status: null, attendance: 85 }, { id: "S004", name: "Rodríguez, Luis", dni: "45.456.789", classId: "4B_TIP", tutorName: "Elena Rodríguez", tutorPhone: "362-4445566", status: null, attendance: 92 }, { id: "S005", name: "Fernández, Carla", dni: "45.567.890", classId: "4B_TIP", tutorName: "Jorge Fernández", tutorPhone: "362-4556677", status: null, attendance: 65 }, { id: "S006", name: "López, Mateo", dni: "44.111.222", classId: "5A_TEE", tutorName: "Susana Pérez", tutorPhone: "362-4667788", status: null, attendance: 98 }, { id: "S007", name: "Díaz, Valentina", dni: "44.222.333", classId: "5A_TEE", tutorName: "Andrés Díaz", tutorPhone: "362-4778899", status: null, attendance: 81 }, { id: "S008", name: "Sánchez, Tomás", dni: "43.888.999", classId: "6A_TIEA", tutorName: "Laura Sánchez", tutorPhone: "362-4889900", status: null, attendance: 90 },
+        ];
+        const hardcodedFeedData = [ /* ... same as before ... */
+             { id: "F001", type: "announcement", icon: "fa-bullhorn", iconBg: "bg-blue-500", title: "Reunión de Personal Docente", content: "Se convoca a reunión de personal el próximo viernes a las 10:00 hs en sala de profesores. Temas: Planificación anual.", timestamp: "Hace 2 horas", author: "Dirección E.E.T. 172" }, { id: "F002", type: "alert", icon: "fa-triangle-exclamation", iconBg: "bg-yellow-500", title: "Alerta de Asistencia Baja", content: "El alumno Fernández, Carla (4°B TIP) presenta un porcentaje de asistencia general del 65%. Se recomienda seguimiento.", timestamp: "Hace 1 día", studentId: "S005", classId: "4B_TIP" }, { id: "F003", type: "log", icon: "fa-clipboard-check", iconBg: "bg-green-500", title: "Asistencia Registrada", content: "Se registró la asistencia para el curso 4° Año 'A' - Téc. Industrias de Procesos.", timestamp: "Ayer a las 14:30", classId: "4A_TIP" }, { id: "F004", type: "info", icon: "fa-calendar-days", iconBg: "bg-purple-500", title: "Próximas Fechas Importantes", content: "Recuerden que la fecha límite para la entrega de planillas de seguimiento es el 25/04.", timestamp: "Hace 3 días", author: "Secretaría" }, { id: "F005", type: "alert", icon: "fa-triangle-exclamation", iconBg: "bg-yellow-500", title: "Alerta de Asistencia Baja", content: "El alumno Pérez, Juan Carlos (4°A TIP) presenta un porcentaje de asistencia general del 78%. Monitorear.", timestamp: "Hace 4 días", studentId: "S002", classId: "4A_TIP" },
+        ];
+
+        // List of Subjects for Gradebook
+        const subjectList = [ "BIOLOGÍA", "HISTORIA", "GEOGRAFÍA", "LENGUA Y LITERATURA", "LENGUA EXTRANJERA (INGLES)", "EDUCACIÓN FÍSICA", "FORMACIÓN ÉTICA Y CIUDADANA", "MATEMÁTICA", "FÍSICO-QUÍMICA", "DIBUJO TÉCNICO", "TECNOLOGIA", "SABERES DIGITALES", "Informática (Taller)", "Gestión (Taller)", "Especifico orientación (Taller)", "Taller STEAM (Taller)" ];
+
+        // --- UPDATED: Simulated Grades Data ---
+        // Structure: { studentId: { subjectName: { c1: grade, c2: grade, final: grade } } }
+        // Grades are invented for students in 4A_TIP (S001, S002, S003, S009)
+        const hardcodedGradesData = {
+            "S001": { // Gómez, Ana Laura
+                "BIOLOGÍA": { c1: 8, c2: 9, final: 9 },
+                "HISTORIA": { c1: 7, c2: 7, final: 7 },
+                "LENGUA Y LITERATURA": { c1: 9, c2: 8, final: 9 },
+                "MATEMÁTICA": { c1: 8, c2: 8, final: 8 },
+                "FÍSICO-QUÍMICA": { c1: 7, c2: 9, final: 8 },
+                "EDUCACIÓN FÍSICA": { c1: 10, c2: 10, final: 10 },
+                // Add more subjects with grades or '-'
+                 "GEOGRAFÍA": { c1: 7, c2: '-', final: '-' },
+                 "LENGUA EXTRANJERA (INGLES)": { c1: 9, c2: '-', final: '-' },
+                 "FORMACIÓN ÉTICA Y CIUDADANA": { c1: 8, c2: '-', final: '-' },
+                 "DIBUJO TÉCNICO": { c1: 9, c2: '-', final: '-' },
+                 "TECNOLOGIA": { c1: 8, c2: '-', final: '-' },
+                 "SABERES DIGITALES": { c1: 10, c2: '-', final: '-' },
+            },
+            "S002": { // Pérez, Juan Carlos
+                "BIOLOGÍA": { c1: 6, c2: 5, final: 6 },
+                "HISTORIA": { c1: 5, c2: 6, final: 6 },
+                "LENGUA Y LITERATURA": { c1: 7, c2: 7, final: 7 },
+                "MATEMÁTICA": { c1: 4, c2: 5, final: 5 }, // Lower grade example
+                "FÍSICO-QUÍMICA": { c1: 6, c2: 6, final: 6 },
+                "EDUCACIÓN FÍSICA": { c1: 8, c2: 9, final: 9 },
+                 "GEOGRAFÍA": { c1: 6, c2: '-', final: '-' },
+                 "LENGUA EXTRANJERA (INGLES)": { c1: 7, c2: '-', final: '-' },
+                 "FORMACIÓN ÉTICA Y CIUDADANA": { c1: 7, c2: '-', final: '-' },
+            },
+            "S003": { // Martínez, Sofía
+                "BIOLOGÍA": { c1: 9, c2: 10, final: 10 },
+                "HISTORIA": { c1: 8, c2: 9, final: 9 },
+                "LENGUA Y LITERATURA": { c1: 10, c2: 9, final: 10 },
+                "MATEMÁTICA": { c1: 9, c2: 9, final: 9 },
+                "FÍSICO-QUÍMICA": { c1: 10, c2: 10, final: 10 },
+                "EDUCACIÓN FÍSICA": { c1: 9, c2: 10, final: 10 },
+                 "TECNOLOGIA": { c1: 9, c2: '-', final: '-' },
+                 "SABERES DIGITALES": { c1: 10, c2: '-', final: '-' },
+            },
+             "S009": { // Alegres, Erik Uriel
+                 "LENGUA Y LITERATURA": { c1: 7, c2: 8, final: 8 },
+                 "LENGUA EXTRANJERA (INGLES)": { c1: 9, c2: 9, final: 9 },
+                 "MATEMÁTICA": { c1: 6, c2: 7, final: 7 },
+                 "HISTORIA": { c1: 8, c2: '-', final: '-' },
+                 "EDUCACIÓN FÍSICA": { c1: 9, c2: '-', final: '-' },
+             }
+            // Add grades for other students as needed
+        };
+
+
+        // --- Reusable Components ---
+        const NavItem = ({ icon, label, isActive, onClick }) => ( /* ... same as before ... */
+             <li> <a href="#" onClick={(e) => { e.preventDefault(); onClick(); }} className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-smooth group ${ isActive ? 'sidebar-link-active' : 'text-gray-600 hover:bg-gray-200 hover:text-gray-900' }`} > <Icon name={icon} className={`w-5 h-5 mr-3 flex-shrink-0 ${isActive ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-500'}`} /> {label} </a> </li>
+        );
+
+        // --- Main Layout Components ---
+        const SidebarNav = ({ preceptor, currentView, navigate, onLogout }) => { /* ... same as before, but remove Mensajes ... */
+            const getInitials = (name) => { if (!name) return "?"; const names = name.split(' '); if (names.length === 1) return name.substring(0, 2).toUpperCase(); return (names[0][0] + names[names.length - 1][0]).toUpperCase(); };
+            return ( <div className="w-64 bg-white h-full flex flex-col border-r border-gray-200 flex-shrink-0"> {/* Logo/Header */} <div className="px-4 py-5 border-b border-gray-200 flex items-center gap-3"> <span className="inline-block p-2 bg-blue-600 rounded-lg"> <Icon name="fa-school" className="text-white text-xl"/> </span> <h1 className="text-lg font-bold text-gray-800">Plataforma E.E.T.</h1> </div> {/* Preceptor Profile Mini */} <div className="px-4 py-4 border-b border-gray-200"> <div className="flex items-center gap-3"> <span className="w-10 h-10 rounded-full bg-blue-200 text-blue-700 flex items-center justify-center font-semibold text-sm"> {getInitials(preceptor.nombre)} </span> <div> <p className="text-sm font-semibold text-gray-800">{preceptor.nombre}</p> <p className="text-xs text-gray-500">{preceptor.rol}</p> </div> </div> </div> {/* Navigation */} <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto"> <ul> <NavItem icon="fa-house" label="Inicio" isActive={currentView === 'feed'} onClick={() => navigate('feed')} /> <NavItem icon="fa-clipboard-user" label="Tomar Asistencia" isActive={currentView === 'attendance'} onClick={() => navigate('attendance')} /> <NavItem icon="fa-address-book" label="Directorio" isActive={currentView === 'directory'} onClick={() => navigate('directory')} /> <NavItem icon="fa-graduation-cap" label="Calificaciones" isActive={currentView === 'grades'} onClick={() => navigate('grades')} /> {/* Mensajes REMOVED */} {/* <NavItem icon="fa-message" label="Mensajes" isActive={currentView === 'messages'} onClick={() => alert('Funcionalidad de Mensajes (simulada)')} /> */} </ul> </nav> {/* Footer/Logout */} <div className="px-3 py-4 border-t border-gray-200"> <button onClick={onLogout} className="w-full flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-600 hover:bg-red-100 hover:text-red-700 transition-smooth group" > <Icon name="fa-right-from-bracket" className="w-5 h-5 mr-3 text-gray-400 group-hover:text-red-500" /> Cerrar Sesión </button> </div> </div> );
+         };
+
+        // --- View Components ---
+        const FeedCard = ({ item }) => { /* ... same as before ... */
+             const handleAction = (action) => { alert(`Simulación: Acción "${action}" para item "${item.title}"`); };
+             return ( <div className="feed-card"> <div className="feed-card-header"> <span className={`feed-card-icon ${item.iconBg}`}> <Icon name={item.icon} className="text-sm" /> </span> <div> <p className="feed-card-title">{item.title}</p> {item.author && <p className="text-xs text-gray-500">Por: {item.author}</p>} </div> <span className="feed-card-time">{item.timestamp}</span> </div> <div className="feed-card-content"> {item.content} </div> <div className="feed-card-actions"> {item.type === 'alert' && ( <button className="feed-action-button" onClick={() => handleAction('Ver Alumno')}> <Icon name="fa-user" className="mr-1 text-xs"/> Ver Alumno </button> )} <button className="feed-action-button" onClick={() => handleAction('Marcar Leído')}> <Icon name="fa-check" className="mr-1 text-xs"/> Marcar Leído </button> <button className="feed-action-button" onClick={() => handleAction('Archivar')}> <Icon name="fa-box-archive" className="mr-1 text-xs"/> Archivar </button> </div> </div> );
+        };
+        const FeedView = ({ feedData }) => ( /* ... same as before ... */
+             <div> <h2 className="text-2xl font-bold text-gray-800 mb-5">Novedades Recientes</h2> {feedData.length > 0 ? ( feedData.map(item => <FeedCard key={item.id} item={item} />) ) : ( <p className="text-gray-500 italic">No hay novedades en el feed.</p> )} </div>
+        );
+        const AttendanceView = ({ students, selectedClassName, onSave }) => { /* ... same as before ... */
+             const [attendance, setAttendance] = useState({}); const [currentDate] = useState(new Date().toLocaleDateString('es-AR')); useEffect(() => { const initialAttendance = {}; students.forEach(student => { initialAttendance[student.id] = student.status || 'P'; }); setAttendance(initialAttendance); }, [students]); const handleStatusChange = (studentId, status) => setAttendance(prev => ({ ...prev, [studentId]: status })); const handleSave = () => onSave(attendance);
+             return ( <div> <h2 className="text-2xl font-bold text-gray-800 mb-1">Toma de Asistencia</h2> <p className="text-sm text-gray-500 mb-5">Curso: <span className="font-medium">{selectedClassName}</span> - Fecha: <span className="font-medium">{currentDate}</span></p> <div className="bg-white rounded-lg shadow overflow-hidden"> <div className="overflow-x-auto"> <table className="min-w-full data-table"> <thead> <tr> <th>Alumno</th> <th className="text-center">Estado</th> </tr> </thead> <tbody> {students.map(student => ( <tr key={student.id} className="text-sm text-gray-700"> <td className="font-medium py-3">{student.name}</td> <td className="text-center py-2 space-x-1 sm:space-x-2"> {['P', 'A', 'T', 'J'].map(status => { const id = `${student.id}-${status}`; let label = ''; let IconFA = ''; switch (status) { case 'P': label = 'Presente'; IconFA = 'fa-check'; break; case 'A': label = 'Ausente'; IconFA = 'fa-xmark'; break; case 'T': label = 'Tarde'; IconFA = 'fa-clock'; break; case 'J': label = 'Justif.'; IconFA = 'fa-file-medical'; break; } return ( <Fragment key={status}> <input type="radio" id={id} name={`attendance-${student.id}`} value={status} checked={attendance[student.id] === status} onChange={() => handleStatusChange(student.id, status)} className="custom-radio"/> <label htmlFor={id} title={label} className="custom-radio-label"> <Icon name={IconFA} className="text-base"/> <span className="hidden lg:inline">{label}</span> </label> </Fragment> ); })} </td> </tr> ))} {students.length === 0 && ( <tr><td colSpan="2" className="text-center py-4 text-gray-500 italic">No hay alumnos en el curso seleccionado.</td></tr> )} </tbody> </table> </div> </div> {students.length > 0 && ( <div className="mt-6 flex justify-end"> <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg shadow-md transition-smooth flex items-center gap-2 active:scale-95"> <Icon name="fa-save" /> Guardar Asistencia </button> </div> )} </div> );
+        };
+        const DirectoryView = ({ students, selectedClassName }) => { /* ... same as before ... */
+             const [searchTerm, setSearchTerm] = useState(""); const filteredStudents = useMemo(() => { if (!searchTerm) return students; const lower = searchTerm.toLowerCase(); return students.filter(s => s.name.toLowerCase().includes(lower) || s.dni.includes(lower) || (s.tutorName && s.tutorName.toLowerCase().includes(lower)) || (s.tutorPhone && s.tutorPhone.includes(lower))); }, [students, searchTerm]);
+             return ( <div> <h2 className="text-2xl font-bold text-gray-800 mb-1">Directorio de Alumnos y Tutores</h2> <p className="text-sm text-gray-500 mb-5">Curso: <span className="font-medium">{selectedClassName}</span></p> {/* Search Bar */} <div className="mb-5 relative"> <input type="text" placeholder="Buscar por nombre, DNI, tutor..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-smooth shadow-sm"/> <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"> <Icon name="fa-search" /> </div> </div> <div className="bg-white rounded-lg shadow overflow-hidden"> <div className="overflow-x-auto"> <table className="min-w-full data-table"> <thead> <tr><th>Alumno</th><th>DNI</th><th>Tutor</th><th>Teléfono Tutor</th></tr> </thead> <tbody> {filteredStudents.length > 0 ? ( filteredStudents.map(s => ( <tr key={s.id} className="text-sm text-gray-700"> <td className="font-medium py-3">{s.name}</td> <td>{s.dni}</td> <td>{s.tutorName || "-"}</td> <td>{s.tutorPhone || "-"}</td> </tr> )) ) : ( <tr><td colSpan="4" className="text-center py-4 text-gray-500 italic">No se encontraron alumnos.</td></tr> )} </tbody> </table> </div> </div> </div> );
+        };
+
+        // --- UPDATED: Grades View ---
+        const GradesView = ({ students, grades, selectedClassName }) => {
+
+            // Helper to get grade or placeholder
+             const getGrade = (studentId, subject, type) => {
+                 const gradeData = grades[studentId]?.[subject]?.[type];
+                 return gradeData !== undefined && gradeData !== null ? gradeData : '-';
+             };
+
+             // Determine grade cell class
+            const getGradeClass = (grade) => {
+                if (grade === '-') return 'grade-placeholder';
+                if (grade < 4) return 'text-red-600 font-semibold'; // Aplazado (ejemplo)
+                if (grade < 7) return 'text-orange-600'; // Aprobado bajo (ejemplo)
+                return 'text-green-700'; // Aprobado bien (ejemplo)
+            };
+
+
+            return (
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-1">Libretas de Calificaciones</h2>
+                    <p className="text-sm text-gray-500 mb-5">Curso: <span className="font-medium">{selectedClassName}</span></p>
+
+                    {students.length === 0 && (
+                         <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500 italic">
+                            Seleccione un curso con alumnos para ver las calificaciones.
+                        </div>
+                    )}
+
+                    <div className="space-y-6">
+                        {students.map(student => (
+                            <div key={student.id} className="bg-white rounded-lg shadow overflow-hidden">
+                                <h3 className="text-lg font-semibold text-gray-700 bg-gray-100 px-4 py-3 border-b border-gray-200">
+                                    <Icon name="fa-user" className="mr-2 text-blue-600" /> {student.name}
+                                </h3>
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full data-table">
+                                        <thead>
+                                            <tr>
+                                                <th className="w-2/5">Materia</th>
+                                                <th className="text-center">1° Cuat.</th>
+                                                <th className="text-center">2° Cuat.</th>
+                                                <th className="text-center">Nota Final</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {subjectList.map(subject => {
+                                                const c1 = getGrade(student.id, subject, 'c1');
+                                                const c2 = getGrade(student.id, subject, 'c2');
+                                                const final = getGrade(student.id, subject, 'final');
+                                                // Only show row if at least one grade exists for this student/subject
+                                                const hasGrades = c1 !== '-' || c2 !== '-' || final !== '-';
+
+                                                if (!hasGrades) return null; // Skip row if no grades exist
+
+                                                return (
+                                                    <tr key={subject}>
+                                                        <td className="font-medium">{subject}</td>
+                                                        <td className={`grade-cell ${getGradeClass(c1)}`}>{c1}</td>
+                                                        <td className={`grade-cell ${getGradeClass(c2)}`}>{c2}</td>
+                                                        <td className={`grade-cell ${getGradeClass(final)} font-bold`}>{final}</td>
+                                                    </tr>
+                                                );
+                                             })}
+                                             {/* Add a row if no subjects had grades for this student */}
+                                             { Object.keys(grades[student.id] || {}).length === 0 && (
+                                                 <tr><td colSpan="4" className="text-center py-3 text-gray-400 italic">Sin calificaciones cargadas para este alumno.</td></tr>
+                                             )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- NEW: AI Chatbot Modal Component ---
+        const AIChatbotModal = ({ isOpen, onClose }) => {
+             const initialMessages = [ { sender: 'bot', text: '¡Hola! Soy tu Asistente de Preceptoría E.E.T. ¿Cómo puedo ayudarte hoy?' }, { sender: 'bot', text: 'Puedes consultarme sobre:\n• Generar reportes rápidos\n• Buscar información de alumnos\n• Procedimientos escolares\n• ¡O simplemente organizar tus tareas!' } ];
+             const [messages, setMessages] = useState(initialMessages);
+             const [inputValue, setInputValue] = useState('');
+             const chatEndRef = useRef(null);
+
+             useEffect(() => { if (isOpen) setMessages(initialMessages); setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100); }, [isOpen]);
+             useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+             const handleSendMessage = (e) => {
+                 e.preventDefault(); if (!inputValue.trim()) return;
+                 const userMessage = { sender: 'user', text: inputValue };
+                 const responses = [ 'Entendido. Procesando tu solicitud...', 'Excelente. ¿Necesitas algo más con eso?', 'Recibido. Dame un momento para verificar.', 'Estoy aquí para asistirte. ¿Qué más necesitas?', 'Anotado. ¿Puedo ayudarte con otra tarea?' ];
+                 const botResponse = { sender: 'bot', text: responses[Math.floor(Math.random() * responses.length)] };
+                 setMessages(prev => [...prev, userMessage, botResponse]); setInputValue('');
+             };
+             const examplePrompts = [ "Generar reporte de asistencia para 4°A TIP", "¿Cuál es el teléfono del tutor de Gómez, Ana?", "Buscar protocolo de acción para llegadas tarde", ];
+             const handlePromptClick = (prompt) => setInputValue(prompt);
+
+             if (!isOpen) return null;
+
+             return (
+                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-fade-in-fast">
+                     <div className="bg-gradient-to-br from-gray-100 to-blue-100 rounded-t-2xl sm:rounded-xl shadow-2xl w-full max-w-lg h-[90vh] sm:h-auto sm:max-h-[85vh] flex flex-col overflow-hidden border border-gray-300/50">
+                         {/* Header */}
+                         <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex-shrink-0 shadow-lg">
+                             <div className="flex items-center gap-3"> <Bot /> <h3 className="text-lg font-semibold">Asistente Preceptoría</h3> </div>
+                             <button onClick={onClose} className="text-blue-100 hover:text-white transition-smooth p-1 rounded-full hover:bg-white/20" aria-label="Cerrar chat"> <X /> </button>
+                         </div>
+                         {/* Message area */}
+                         <div className="flex-grow p-4 space-y-4 overflow-y-auto bg-gray-50/50">
+                             {messages.map((msg, index) => ( <div key={index} className={`flex ${msg.sender === 'bot' ? 'justify-start' : 'justify-end'} animate-bubble-pop`} style={{ animationDelay: `${index * 0.05}s` }}> <div className={`max-w-[85%] px-4 py-2.5 rounded-xl shadow-md ${msg.sender === 'bot' ? 'bg-white border border-gray-200 text-gray-800 rounded-bl-none' : 'bg-blue-600 text-white rounded-br-none'}`}> <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p> </div> </div> ))}
+                             {messages.length <= 3 && ( <div className="pt-4 border-t border-gray-200/80 mt-4 animate-fade-in"> <p className="text-xs text-gray-500 mb-2 text-center font-medium">Prueba con un ejemplo:</p> <div className="flex flex-col gap-2"> {examplePrompts.map((prompt, i) => ( <button key={i} onClick={() => handlePromptClick(prompt)} className="flex-1 text-xs text-blue-700 bg-blue-100 border border-blue-200/80 rounded-full px-3 py-1.5 text-center hover:bg-blue-200 transition-smooth duration-150 shadow-sm hover:shadow active:scale-95"> {prompt} </button> ))} </div> </div> )}
+                             <div ref={chatEndRef} />
+                         </div>
+                         {/* Input area */}
+                         <form onSubmit={handleSendMessage} className="p-3 border-t border-gray-200 bg-white flex-shrink-0">
+                             <div className="flex items-center gap-2">
+                                 <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Escribe tu consulta..." className="flex-grow px-4 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm shadow-sm" aria-label="Campo de entrada para el chat"/>
+                                 <button type="submit" className="p-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-smooth transform hover:scale-110 shadow-md active:scale-100" aria-label="Enviar mensaje"> <Send /> </button>
+                             </div>
+                         </form>
+                     </div>
+                 </div>
+             );
+         };
+
+        // --- NEW: Persistent AI Assistant Button Component ---
+         const AsistentePreceptoria = ({ onClick }) => {
+             const tips = [ "Gestiona asistencia rápidamente.", "¿Necesitas datos de contacto?", "Consulta calificaciones fácil.", "Organiza tus tareas aquí.", "Reportes y estadísticas." ];
+             const [currentTip, setCurrentTip] = useState(''); const [showTip, setShowTip] = useState(false);
+             useEffect(() => { let tI, tT, sT; const showNextTip = () => { setCurrentTip(tips[Math.floor(Math.random() * tips.length)]); setShowTip(true); tT = setTimeout(() => setShowTip(false), 4000); }; sT = setTimeout(() => { showNextTip(); tI = setInterval(showNextTip, 7000); }, 3000); return () => { clearTimeout(sT); clearInterval(tI); clearTimeout(tT); }; }, []);
+
+             return (
+                 <div className="fixed bottom-5 right-5 z-40 group"> {/* Removed fade-in delay for faster appearance */}
+                     {/* Tip Bubble */}
+                     {showTip && ( <div className="absolute bottom-full right-0 mb-2 w-max max-w-xs px-3 py-1.5 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none animate-bubble-pop"> {currentTip} <div className="absolute top-full right-3 border-solid border-t-gray-800 border-t-8 border-x-transparent border-x-8 border-b-0"></div> </div> )}
+                     {/* Assistant Button */}
+                     <button onClick={onClick} className="p-4 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-full shadow-xl hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-smooth duration-200 transform hover:scale-105 active:scale-95 animate-eet-pulse" aria-label="Abrir Asistente de Preceptoría">
+                         <Bot />
+                     </button>
+                 </div>
+             );
+         };
+
+
+        // --- Main App Component ---
+        const App = () => {
+            const [isLoading, setIsLoading] = useState(true);
+            const [preceptorData, setPreceptorData] = useState(null);
+            const [classes, setClasses] = useState([]);
+            const [students, setStudents] = useState([]);
+            const [grades, setGrades] = useState({});
+            const [feedData, setFeedData] = useState([]);
+            const [selectedClassId, setSelectedClassId] = useState(null);
+            const [currentView, setCurrentView] = useState('feed');
+            const [isAIChatOpen, setIsAIChatOpen] = useState(false); // State for AI Chat
+
+            // Simulate data loading
+            useEffect(() => { /* ... same data loading logic ... */
+                 const timer = setTimeout(() => { setPreceptorData(hardcodedPreceptorData); setClasses(hardcodedClassesData); setStudents(hardcodedStudentsList); setGrades(hardcodedGradesData); setFeedData(hardcodedFeedData); if (hardcodedClassesData.length > 0) { setSelectedClassId(hardcodedClassesData[0].id); } setIsLoading(false); document.getElementById('loading-indicator').style.display = 'none'; }, 1200); return () => clearTimeout(timer);
+            }, []);
+
+            // Filter students based on selected class
+            const studentsInSelectedClass = useMemo(() => { /* ... same logic ... */
+                 if (!selectedClassId) return []; return students.filter(s => s.classId === selectedClassId);
+            }, [students, selectedClassId]);
+
+            const selectedClassName = useMemo(() => { /* ... same logic ... */
+                 return classes.find(c => c.id === selectedClassId)?.name || "Ninguno seleccionado";
+            }, [classes, selectedClassId]);
+
+            const handleNavigate = (view) => { /* ... same logic ... */
+                 if (['attendance', 'directory', 'grades'].includes(view) && !selectedClassId) { alert("Por favor, seleccione un curso primero desde el menú superior."); return; } setCurrentView(view);
+            };
+
+            const handleSaveAttendance = (attendanceData) => { /* ... same logic ... */
+                 console.log("Guardando Asistencia:", attendanceData); alert(`Simulación: Asistencia para ${selectedClassName} guardada.`); setFeedData(prevFeed => [ { id: `F${Date.now()}`, type: "log", icon: "fa-clipboard-check", iconBg: "bg-green-500", title: "Asistencia Registrada", content: `Se registró la asistencia para ${selectedClassName}.`, timestamp: "Ahora mismo", classId: selectedClassId }, ...prevFeed ]); setCurrentView('feed');
+            };
+
+            const handleLogout = () => { /* ... same logic ... */
+                 alert('Simulación: Cerrando sesión...'); window.location.reload();
+            };
+
+            if (isLoading) return null;
+
+            const renderViewContent = () => { /* ... same logic ... */
+                 switch (currentView) { case 'attendance': return <AttendanceView students={studentsInSelectedClass} selectedClassName={selectedClassName} onSave={handleSaveAttendance} />; case 'directory': return <DirectoryView students={studentsInSelectedClass} selectedClassName={selectedClassName} />; case 'grades': return <GradesView students={studentsInSelectedClass} grades={grades} selectedClassName={selectedClassName} />; case 'feed': default: return <FeedView feedData={feedData} />; }
+            };
+
+            return (
+                <Fragment>
+                    <SidebarNav
+                        preceptor={preceptorData}
+                        currentView={currentView}
+                        navigate={handleNavigate}
+                        onLogout={handleLogout}
+                    />
+                    <main className="flex-1 h-full overflow-hidden flex flex-col">
+                         {/* Top Bar for Class Selection */}
+                         <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
+                             <label htmlFor="class-select-main" className="text-xs font-medium text-gray-500 mr-2">Curso Activo:</label>
+                             <select id="class-select-main" value={selectedClassId || ""} onChange={(e) => setSelectedClassId(e.target.value)} className="p-1 border border-gray-300 rounded-md bg-gray-50 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500" > <option value="" disabled>-- Seleccionar --</option> {classes.map(cls => ( <option key={cls.id} value={cls.id}>{cls.name}</option> ))} </select>
+                         </div>
+                         {/* Scrollable Content */}
+                         <div className="flex-1 overflow-y-auto p-6 main-content-area">
+                             {renderViewContent()}
+                         </div>
+                    </main>
+                    {/* AI Assistant Button */}
+                     <AsistentePreceptoria onClick={() => setIsAIChatOpen(true)} />
+                    {/* AI Chat Modal */}
+                     <AIChatbotModal isOpen={isAIChatOpen} onClose={() => setIsAIChatOpen(false)} />
+                 </Fragment>
+            );
+        };
+
+        // Render the App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+
+    </script>
+
+</body>
+</html>
+```
+
+**Resumen de los Cambios:**
+
+1.  **Datos de Calificaciones (`hardcodedGradesData`):** Se reestructuró para usar los nombres de las nuevas materias y almacenar notas para `c1` (1er Cuat.), `c2` (2do Cuat.) y `final`. Se inventaron algunas notas para los alumnos de 4°A TIP como ejemplo.
+2.  **Vista de Calificaciones (`GradesView`):**
+    * Ahora itera sobre los `students` del curso seleccionado.
+    * Para cada `student`, renderiza una tarjeta (`div` con fondo blanco y sombra) que contiene una tabla (`data-table`).
+    * La tabla lista todas las `subjectList` proporcionadas.
+    * Para cada materia, muestra las notas `c1`, `c2` y `final` obtenidas de `hardcodedGradesData`. Si no hay nota, muestra '-'.
+    * Se añadió una lógica simple para colorear las notas (rojo si es menor a 4, naranja si es menor a 7, verde si es 7 o más) y poner en negrita la nota final.
+    * Las filas de materias sin ninguna nota cargada para ese alumno se omiten para no llenar la libreta con filas vacías.
+    * Se ajustó el padding y tamaño de fuente de las tablas para que quepa más información.
+3.  **Barra Lateral (`SidebarNav`):** Se eliminó el `NavItem` correspondiente a "Mensajes".
+4.  **Asistente IA:**
+    * Se reintrodujeron los componentes `AIChatbotModal` y `AsistentePreceptoria`.
+    * Se añadieron las definiciones de los iconos `Bot`, `Send`, `X` necesarios para el chat.
+    * Se añadió el estado `isAIChatOpen` al componente `App`.
+    * Se renderizan el botón flotante y el modal en el `Fragment` principal del `App`.
+    * Se incluyeron las animaciones CSS (`@keyframes eetPulse`, `fadeInFast`, `bubblePop`) en el bloque `<style>`.
+
+Ahora la sección de Calificaciones es mucho más detallada, mostrando una libreta por alumno, se eliminó la opción de Mensajes y el Asistente IA está nuevamente disponib

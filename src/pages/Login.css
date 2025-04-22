@@ -1,0 +1,212 @@
+/* Estilos generales */
+body {
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #c6d5e4, #e5f0f6);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  animation: fadeIn 1.5s ease-in-out;
+  background-image: url('https://www.transparenttextures.com/patterns/diagmonds.png');
+  background-size: 200px 200px;
+}
+
+/* Animación de entrada suave */
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Contenedor principal del login */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.8s ease-in-out;
+}
+
+/* Animación para el contenedor de login */
+@keyframes slideUp {
+  0% { transform: translateY(50px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Logo */
+.logo-container {
+  margin-bottom: 20px;
+  animation: logoFadeIn 1.2s ease-in-out;
+  display: flex;
+  justify-content: center;
+}
+
+.logo-container img {
+  max-width: 180px;
+  margin-bottom: 20px;
+  border: 3px solid #5fa8d3;
+  border-radius: 8px;
+  padding: 5px;
+}
+
+/* Animación suave para el logo */
+@keyframes logoFadeIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Título */
+.login-title {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* Estilos de los grupos de entradas */
+.input-group {
+  width: 100%;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.input-group label {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-sizing: border-box;
+  background-color: #f7f7f7;
+  margin-bottom: 10px;
+  transition: border 0.3s ease;
+}
+
+/* Ejemplo al lado del campo */
+.input-group .example {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #666;
+}
+
+/* Indicador de mayúsculas activadas */
+.caps-lock-indicator {
+  display: none;
+  font-size: 12px;
+  color: red;
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  margin-left: 10px;
+}
+
+/* Botón de mostrar/ocultar contraseña */
+.show-password-btn {
+  background: none;
+  border: none;
+  color: #5fa8d3;
+  font-size: 14px;
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+}
+
+/* Botón de ingreso */
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #5fa8d3;
+  border: none;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
+}
+
+.login-btn:hover {
+  background-color: #4b93b6;
+}
+
+/* Mensaje de error */
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Olvidaste la contraseña */
+.forgot-password {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.forgot-password a {
+  color: #5fa8d3;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
+.forgot-password p {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #666;
+}
+
+/* Estilos del pie de página (letra pequeña) */
+.footer {
+  font-size: 12px;
+  color: #777;
+  text-align: center;
+  margin-top: 30px;
+  padding: 15px;
+  width: 100%;
+  background-color: #f4f4f4;
+  border-radius: 10px;
+  animation: fadeIn 2s ease-in-out;
+}
+
+.footer strong {
+  font-weight: bold;
+}
+
+.footer p {
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    padding: 20px;
+    width: 90%;
+  }
+}

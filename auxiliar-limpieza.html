@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Auxiliar</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilo personalizado para el botón de subir archivo */
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .file-upload-button {
+            background-color: #f0fdf4;
+            color: #15803d;
+            padding: 10px 15px;
+            border-radius: 0.5rem;
+            border: 1px solid #bbf7d0;
+            transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+        }
+        .file-upload-button:hover {
+            background-color: #ecfccb;
+            border-color: #86ef7d;
+            transform: translateY(-2px);
+        }
+        .file-upload-wrapper input[type="file"] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary:hover {
+            background-color: #6366f1;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 7px rgba(0, 0, 0, 0.15);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .icon-lg {
+            font-size: 1.5rem;
+        }
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            background-color: #f7fafc;
+            border: 1px solid #e2e8f0;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+        .mensaje {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            max-width: 80%;
+        }
+        .mensaje-usuario {
+            background-color: #d4f1f7;
+            color: #0c4a6e;
+            align-self: flex-end;
+            text-align: right;
+        }
+        .mensaje-ia {
+            background-color: #e5e7eb;
+            color: #374151;
+            align-self: flex-start;
+        }
+        .input-mensaje {
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            width: 100%;
+            margin-right: 0.5rem;
+            font-size: 1rem;
+            focus:outline-none;
+            focus:ring-2;
+        }
+        .input-container {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Estilos para la pestaña flotante del chat */
+        #chat-widget {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #4f46e5;
+            color: white;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out, border-radius 0.3s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        #chat-widget:hover {
+            background-color: #6366f1;
+            transform: translateY(-2px);
+        }
+
+        #chat-widget.active {
+            border-radius: 0.75rem;
+            width: 350px;
+            height: auto;
+            max-height: 500px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        #chat-widget.active .icon-lg {
+            margin-right: 0.5rem;
+        }
+
+        #chat-widget .icon-lg {
+            font-size: 1.5rem;
+            margin-right: 0;
+        }
+
+        /* Estilos para el degradado del body */
+        body {
+            background: linear-gradient(to bottom, #f0f9ff, #e0f2fe);
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            animation: gradient-animation 18s ease infinite;
+        }
+
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Estilos para el mensaje de ayuda inicial */
+        #initial-message {
+            position: absolute;
+            top: -2.5rem;
+            left: 3.5rem;
+            background-color: #f0fdf4;
+            color: #15803d;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            transform: translateY(10px);
+            pointer-events: none;
+        }
+
+        #chat-widget:hover #initial-message {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #chat-widget.active #initial-message {
+            display: none;
+        }
+
+        /* Nuevos estilos para mejorar la apariencia del círculo */
+        #chat-widget {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out, border-radius 0.3s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            /* Nuevos estilos para el icono del robot */
+        }
+
+        #chat-widget:hover {
+            background: linear-gradient(135deg, #5b53f2, #7879f1);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        #chat-widget img {
+            /* Estilos para el icono del robot */
+            width: 2rem; /* Tamaño del icono */
+            height: 2rem;
+        }
+
+        /* Estilos para el mensaje de bienvenida en el chat */
+        #chat-container .mensaje-ia {
+            background-color: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            max-width: 90%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        #chat-container .mensaje-ia ul {
+            list-style-type: disc;
+            padding-left: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        #chat-container .mensaje-ia li {
+            margin-bottom: 0.25rem;
+        }
+
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+
+    <button
+        onclick="cerrarSesion()"
+        title="Cerrar Sesión"
+        class="fixed top-4 right-4 bg-rose-600 text-white px-4 py-2 rounded-md shadow-lg hover:bg-rose-700 transition-all duration-300 text-sm flex items-center active:scale-95 transform hover:shadow-xl z-20">
+        <i class="fas fa-power-off mr-2 icon-lg"></i> <span class="font-semibold">Salir</span>
+    </button>
+
+    <div class="max-w-md mx-auto py-16 px-6 sm:px-8">
+
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-indigo-800 mb-2">Panel del Auxiliar</h1>
+            <p class="text-lg text-gray-700" id="nombreUsuario">Cargando...</p>
+        </div>
+
+        <div class="space-y-6">
+
+            <div class="card">
+                <div class="flex items-center mb-4">
+                    <div class="p-3 rounded-md bg-blue-100 text-blue-600">
+                        <i class="fas fa-calendar-check fa-lg icon-lg"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-blue-800 ml-4">Asistencia</h2>
+                </div>
+                <div class="text-gray-700 space-y-3 mb-5">
+                    <p><i class="fas fa-check-circle text-green-500 mr-2"></i> <span class="font-medium text-green-700">Hoy: Presente</span></p>
+                    <p><i class="fas fa-times-circle text-red-500 mr-2"></i> <span class="font-medium text-red-700">Faltas: 0</span></p>
+                    <p><i class="fas fa-sun text-yellow-500 mr-2"></i> <span class="font-medium text-yellow-700">Licencias: 5 días</span></p>
+                </div>
+                <button onclick="solicitarLicencia()" class="btn-primary">
+                    <i class="fas fa-calendar-plus mr-2 icon-lg"></i> Solicitar Licencia
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="flex items-center mb-4">
+                    <div class="p-3 rounded-md bg-lime-100 text-lime-600">
+                        <i class="fas fa-box-open fa-lg icon-lg"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-lime-800 ml-4">Suministros</h2>
+                </div>
+                <textarea id="solicitud-suministros" rows="4" class="w-full border border-gray-300 rounded-md p-3 mb-5 text-sm focus:outline-none focus:ring-2 focus:ring-lime-200" placeholder="¿Qué suministros necesitas?"></textarea>
+                <button onclick="enviarSolicitudSuministros()" class="btn-primary">
+                    <i class="fas fa-paper-plane mr-2 icon-lg"></i> Enviar Solicitud
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="flex items-center mb-4">
+                    <div class="p-3 rounded-md bg-orange-100 text-orange-600">
+                        <i class="fas fa-file-upload fa-lg icon-lg"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-orange-800 ml-4">Comprobantes</h2>
+                </div>
+                <p class="text-md text-gray-600 mb-4"><i class="fas fa-info-circle text-orange-400 mr-2"></i> Sube los comprobantes de tus compras.</p>
+                <div class="flex items-center space-x-4 mb-5">
+                    <div class="file-upload-wrapper">
+                        <button class="file-upload-button">
+                            <i class="fas fa-paperclip mr-2 icon-lg"></i> Adjuntar
+                            <input type="file" id="comprobante-file" accept="image/*,.pdf">
+                        </button>
+                    </div>
+                    <span id="file-name" class="text-sm text-gray-500 italic">Ningún archivo</span>
+                </div>
+                <button onclick="subirComprobante()" class="btn-primary">
+                    <i class="fas fa-cloud-upload-alt mr-2 icon-lg"></i> Subir Comprobante
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="chat-widget" onclick="toggleChat()">
+        <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/robot.svg" alt="Chat IA" class="icon-lg">
+        <span class="font-semibold sr-only">Chat IA</span>
+        <div id="initial-message">Hola, Luis, ¿cómo puedo ayudarte?</div>
+        <div id="chat-container" class="hidden">
+            <div class="mensaje mensaje-ia">
+                Hola, Luis, soy tu asistente virtual. Puedo ayudarte con:
+                <ul class="list-disc list-inside mt-2">
+                    <li>Solicitar licencias</li>
+                    <li>Solicitar suministros</li>
+                    <li>Subir comprobantes de compra</li>
+                    <li>Consultar tu asistencia</li>
+                </ul>
+            </div>
+        </div>
+        <div class="input-container hidden">
+            <input type="text" id="input-mensaje" class="input-mensaje" placeholder="Escribe tu mensaje...">
+            <button onclick="enviarMensaje()" class="btn-primary">
+                <i class="fas fa-paper-plane mr-2 icon-lg"></i> Enviar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- Datos y Sesión ---
+        const usuarioData = {
+            nombre: "Luis Pérez",
+            rol: "Auxiliar de Limpieza"
+        };
+
+        function cerrarSesion() {
+            console.log("Cerrando sesión...");
+            sessionStorage.clear();
+            window.location.href = "index.html";
+        }
+
+        // --- Funciones Simuladas ---
+        function solicitarLicencia() {
+            alert("Simulación: Accediendo al formulario de solicitud de licencia.");
+            // Aquí iría la lógica para mostrar un modal o redirigir
+        }
+
+        function enviarSolicitudSuministros() {
+            const solicitud = document.getElementById('solicitud-suministros').value;
+            if (solicitud.trim() === '') {
+                alert("Por favor, escribe qué suministros necesitas.");
+                return;
+            }
+            alert(`Simulación: Solicitud enviada:\n"${solicitud}"`);
+            document.getElementById('solicitud-suministros').value = '';
+            // Aquí iría la lógica para enviar la solicitud al servidor
+        }
+
+        function subirComprobante() {
+            const fileInput = document.getElementById('comprobante-file');
+            if (fileInput.files.length === 0) {
+                alert("Por favor, selecciona un archivo para subir.");
+                return;
+            }
+            const fileName = fileInput.files[0].name;
+            alert(`Simulación: Subiendo archivo "${fileName}"...`);
+            // Aquí iría la lógica para subir el archivo al servidor
+            document.getElementById('file-name').textContent = 'Ningún archivo';
+            fileInput.value = null;
+        }
+
+        // --- Chat con la IA ---
+        const chatWidget = document.getElementById('chat-widget');
+        const chatContainer = document.getElementById('chat-container');
+        const inputMensaje = document.getElementById('input-mensaje');
+        const inputContainer = document.querySelector('.input-container');
+
+        function toggleChat() {
+            chatWidget.classList.toggle('active');
+            chatContainer.classList.toggle('hidden');
+            inputContainer.classList.toggle('hidden');
+            if (chatWidget.classList.contains('active')) {
+                chatWidget.style.borderRadius = '0.75rem';
+                chatWidget.style.width = '350px';
+                chatWidget.style.height = 'auto';
+                chatWidget.style.maxHeight = '500px';
+                chatWidget.style.padding = '1.5rem';
+                chatWidget.style.display = 'flex';
+                flexDirection = 'column';
+                alignItems = 'flex-start';
+            } else {
+                chatWidget.style.borderRadius = '50%';
+                chatWidget.style.width = '3rem';
+                chatWidget.style.height = '3rem';
+                chatWidget.style.padding = '0.75rem';
+                chatWidget.style.display = 'flex';
+                flexDirection = 'column';
+                alignItems = 'center';
+            }
+        }
+
+        function enviarMensaje() {
+            const mensajeUsuario = inputMensaje.value;
+            if (mensajeUsuario.trim() === '') return;
+
+            const nuevoMensajeUsuario = document.createElement('div');
+            nuevoMensajeUsuario.classList.add('mensaje', 'mensaje-usuario');
+            nuevoMensajeUsuario.textContent = mensajeUsuario;
+            chatContainer.appendChild(nuevoMensajeUsuario);
+
+            inputMensaje.value = '';
+
+            // Simulación de respuesta de la IA
+            setTimeout(() => {
+                const respuestaIA = generarRespuestaIA(mensajeUsuario);
+                const nuevoMensajeIA = document.createElement('div');
+                nuevoMensajeIA.classList.add('mensaje', 'mensaje-ia');
+                nuevoMensajeIA.innerHTML = respuestaIA; // Usar innerHTML para renderizar HTML
+                chatContainer.appendChild(nuevoMensajeIA);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 1000);
+        }
+
+        function generarRespuestaIA(mensaje) {
+            mensaje = mensaje.toLowerCase();
+            if (mensaje.includes('hola') || mensaje.includes('saludos')) {
+                return 'Hola, Luis, ¿cómo puedo ayudarte hoy?';
+            } else if (mensaje.includes('licencia')) {
+                return 'Puedes solicitar una licencia en la sección de Asistencia. ¿Necesitas ayuda con eso?';
+            } else if (mensaje.includes('suministros') || mensaje.includes('necesito')) {
+                return 'Puedes solicitar suministros en la sección correspondiente.  Por favor, especifica la cantidad y detalles de lo que necesitas.';
+            } else if (mensaje.includes('comprobante') || mensaje.includes('factura')) {
+                return 'Puedes subir tus comprobantes de compra en la sección de Comprobantes. Asegúrate de que el archivo sea una imagen o PDF.';
+            } else if (mensaje.includes('asistencia')) {
+                return 'Tu asistencia del día de hoy está registrada como Presente. No tienes faltas y te quedan 5 días de licencia disponibles.';
+            }else {
+                return 'Lo siento, no entiendo esa pregunta.  Puedes preguntar sobre licencias, suministros, comprobantes, o el estado de tu asistencia.';
+            }
+        }
+
+        // --- Inicialización ---
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Mostrar nombre de usuario
+            document.getElementById("nombreUsuario").textContent = `Hola, ${usuarioData.nombre}.`;
+
+            // Mostrar nombre de archivo seleccionado
+            const fileInput = document.getElementById('comprobante-file');
+            const fileNameSpan = document.getElementById('file-name');
+            if (fileInput && fileNameSpan) {
+                fileInput.addEventListener('change', () => {
+                    if (fileInput.files.length > 0) {
+                        fileNameSpan.textContent = fileInput.files[0].name;
+                    } else {
+                        fileNameSpan.textContent = 'Ningún archivo';
+                    }
+                });
+            }
+
+            // Verificar sesión (simple)
+            if (!sessionStorage.getItem("nombre")) {
+                console.warn("Nombre no encontrado en sessionStorage, usando valor por defecto.");
+            } else {
+                console.log(`Sesión activa para: ${usuarioData.nombre}`);
+            }
+
+            // Inicializar el chat al cargar la página
+            const nuevoMensajeIA = document.createElement('div');
+            nuevoMensajeIA.classList.add('mensaje', 'mensaje-ia');
+            nuevoMensajeIA.innerHTML = 'Hola, Luis, soy tu asistente virtual. Puedo ayudarte con: <ul class="list-disc list-inside mt-2"> <li>Solicitar licencias</li> <li>Solicitar suministros</li> <li>Subir comprobantes de compra</li> <li>Consultar tu asistencia</li> </ul>';
+            chatContainer.appendChild(nuevoMensajeIA);
+        });
+    </script>
+</body>
+</html>

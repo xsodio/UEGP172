@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Pedagógico Vicedirector/a - EET UEGP 172</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Paleta: Verdes/Teals y Grises */
+        :root {
+            --primary-700: #047857; /* emerald-700 */
+            --primary-800: #065f46; /* emerald-800 */
+            --primary-900: #064e3b; /* emerald-900 */
+            --accent-500: #14b8a6;  /* teal-500 */
+            --accent-600: #0d9488;  /* teal-600 */
+            --accent-700: #0f766e;  /* teal-700 */
+            --sidebar-text: #a3cec3; /* Tono verde claro para texto sidebar */
+            --sidebar-hover-bg: rgba(13, 148, 136, 0.2); /* teal-600 con opacidad */
+            --sidebar-hover-border: #5eead4; /* teal-300 */
+            --ai-button-from: #14b8a6; /* teal-500 */
+            --ai-button-to: #059669;   /* emerald-600 */
+            --ai-badge-bg: #0d9488;    /* teal-600 */
+            --ai-border: #14b8a6;      /* teal-500 */
+            --ai-link: #0f766e;        /* teal-700 */
+            --ai-msg-bg: #f0fdfa;      /* teal-50 */
+            --user-msg-bg: #047857;    /* emerald-700 */
+        }
+
+        body { display: flex; height: 100vh; overflow: hidden; background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+        #sidebar { width: 260px; flex-shrink: 0; transition: width 0.3s ease; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary-700) var(--primary-900); background-image: linear-gradient(to bottom, var(--primary-800), var(--primary-900)); }
+        #main-content { flex-grow: 1; overflow-y: auto; height: 100vh; position: relative; scrollbar-width: thin; scrollbar-color: #9ca3af #f8fafc; }
+
+        .sidebar-link { display: flex; align-items: center; padding: 0.8rem 1.2rem; color: var(--sidebar-text); transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease; font-size: 0.9rem; border-left: 4px solid transparent; }
+        .sidebar-link:hover { background-color: var(--sidebar-hover-bg); color: #ffffff; transform: translateX(4px); border-left-color: var(--sidebar-hover-border); }
+        .sidebar-link i { margin-right: 0.9rem; width: 20px; text-align: center; transition: transform 0.2s ease; }
+        .sidebar-link:hover i { transform: scale(1.1); }
+
+        .header { height: 64px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); background-color: #ffffff; border-bottom: 1px solid #e5e7eb; }
+        .widget-card { background-color: white; border-radius: 0.6rem; box-shadow: 0 3px 6px rgba(0,0,0,0.04); padding: 1.5rem; transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); border: 1px solid #e5e7eb; }
+        .widget-card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.07); }
+        .widget-card:hover .widget-icon { transform: scale(1.18) rotate(-6deg); }
+        .widget-icon { transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+
+        .notification-dot { height: 9px; width: 9px; background-color: #ef4444; border-radius: 50%; position: absolute; top: -3px; right: -3px; border: 1px solid white; }
+        .ai-badge { background-color: var(--ai-badge-bg); color: white; font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 0.25rem; font-weight: 600; margin-left: 0.5rem; vertical-align: middle; }
+
+        /* Estilos IA con nueva paleta */
+        #ai-chat-button { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 1000; transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; animation: pulse 2.5s infinite ease-in-out; background-image: linear-gradient(to bottom right, var(--ai-button-from), var(--ai-button-to)); }
+        #ai-chat-button:hover { transform: scale(1.1); animation-play-state: paused; box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4); }
+        #ai-chat-window { position: fixed; bottom: 6rem; right: 1.5rem; width: 360px; height: 480px; z-index: 999; transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; transform: translateY(25px) scale(0.95); pointer-events: none; transform-origin: bottom right; border-radius: 0.75rem; }
+        #ai-chat-window.visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+        .chat-message { padding: 0.6rem 0.85rem; border-radius: 0.75rem; margin-bottom: 0.6rem; max-width: 85%; word-wrap: break-word; animation: fadeInChatMessage 0.4s ease-out; line-height: 1.4; }
+        .user-message { background-color: var(--primary-700); color: white; margin-left: auto; text-align: left; border-bottom-right-radius: 0.25rem; }
+        .ai-message { background-color: var(--ai-msg-bg); color: #1f2937; margin-right: auto; border-bottom-left-radius: 0.25rem; }
+        .ai-suggestion { background-color: #f9fafb; border: 1px solid #e5e7eb; color: #4b5563; padding: 0.4rem 0.7rem; font-size: 0.8rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s ease; }
+        .ai-suggestion:hover { background-color: #ccfbf1; border-color: #5eead4; color: #0f766e; transform: translateY(-1px); }
+        .ai-suggestion:active { transform: scale(0.97); }
+
+        /* Estilos Tabla */
+        .table-auto th, .table-auto td { padding: 0.6rem 0.85rem; border: 1px solid #e5e7eb; text-align: left; font-size: 0.875rem; }
+        .table-auto th { background-color: #f9fafb; font-weight: 600; color: #4b5563; }
+        .table-auto tbody tr { transition: background-color 0.15s ease; }
+        .table-auto tbody tr:hover { background-color: #f0fdfa; }
+
+        /* Estilos Mini Libreta */
+        .mini-libreta-materia { display: flex; justify-content: space-between; padding: 0.4rem 0.1rem; border-bottom: 1px dashed #e5e7eb; font-size: 0.8rem; transition: background-color 0.2s ease; border-radius: 0.25rem; }
+        .mini-libreta-materia:hover { background-color: #f0fdfa; padding-left: 0.3rem; padding-right: 0.3rem; }
+        .mini-libreta-materia:last-child { border-bottom: none; }
+        .nota-aprobada { color: #10b981; font-weight: 600; }
+        .nota-desaprobada { color: #ef4444; font-weight: 600; }
+
+        /* Animaciones Keyframes */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in-widget { opacity:0; animation: fadeIn 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.5); } 50% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(20, 184, 166, 0); } }
+        @keyframes fadeInChatMessage { from { opacity: 0; transform: scale(0.98) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        /* Scrollbar styles */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+
+        /* Nota sobre sidebar móvil: Actualmente se oculta en pantallas < 768px. */
+        /* Se necesitaría un botón y JS adicional para mostrarla/ocultarla en móviles. */
+        @media (max-width: 768px) { #sidebar { width: 0; overflow: hidden; } }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <aside id="sidebar" class="bg-gradient-to-b from-emerald-800 to-emerald-900 text-white flex flex-col">
+        <div class="h-16 flex items-center justify-center px-4 bg-emerald-900 shadow-md flex-shrink-0">
+             <img src="https://placehold.co/150x40/FFFFFF/065f46?text=EET+UEGP+172&font=inter"
+                  alt="Logo EET UEGP 172"
+                  class="h-10 w-auto" />
+        </div>
+        <nav class="flex-grow mt-4 overflow-y-auto">
+             <ul>
+                <li><a href="#" onclick="mostrarContenido('inicio')" class="sidebar-link"><i class="fas fa-chalkboard-teacher fa-fw"></i><span>Inicio Pedagógico</span></a></li>
+                <li><a href="#" onclick="navegarA('planificaciones')" class="sidebar-link"><i class="fas fa-clipboard-check fa-fw"></i><span>Planificaciones</span></a></li>
+                <li><a href="#" onclick="navegarA('seguimiento_alumnos')" class="sidebar-link"><i class="fas fa-user-check fa-fw"></i><span>Seguimiento Alumnos</span></a></li>
+                <li><a href="#" onclick="navegarA('proyectos')" class="sidebar-link"><i class="fas fa-lightbulb fa-fw"></i><span>Proyectos Pedagógicos</span></a></li>
+                <li><a href="#" onclick="navegarA('observaciones')" class="sidebar-link"><i class="fas fa-binoculars fa-fw"></i><span>Observación Clases</span></a></li>
+                <li><a href="#" onclick="navegarA('reuniones')" class="sidebar-link"><i class="fas fa-users-cog fa-fw"></i><span>Reuniones Depto.</span></a></li>
+                <li><a href="#" onclick="navegarA('capacitaciones')" class="sidebar-link"><i class="fas fa-graduation-cap fa-fw"></i><span>Capacitaciones</span></a></li>
+                <li><a href="#" onclick="navegarA('calificaciones_vista')" class="sidebar-link"><i class="fas fa-clipboard-list fa-fw"></i><span>Ver Calificaciones</span></a></li>
+                <li><a href="#" onclick="navegarA('ia_pedagogica')" class="sidebar-link relative">
+                    <i class="fas fa-brain fa-fw"></i>
+                    <span>Análisis IA Pedagógico</span>
+                    <span class="notification-dot animate-ping"></span> </a></li>
+                <li><a href="#" onclick="navegarA('configuracion')" class="sidebar-link"><i class="fas fa-cog fa-fw"></i><span>Configuración</span></a></li>
+            </ul>
+        </nav>
+        <div class="p-4 text-center text-xs text-gray-400 border-t border-emerald-700 flex-shrink-0">
+            © 2025 EET UEGP N°172
+        </div>
+    </aside>
+
+    <div id="main-content" class="flex flex-col">
+        <header class="header bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0">
+             <div class="text-sm text-gray-600">
+                 <span id="fecha-hora-actual">Cargando fecha y hora...</span> | Resistencia, Chaco
+             </div>
+            <div class="flex items-center">
+                <div class="text-right mr-4">
+                    <p class="text-sm font-medium text-gray-700" id="nombreUsuarioHeader">Cargando...</p>
+                    <p class="text-xs text-gray-500">DNI: <span id="dniUsuarioHeader">N/A</span></p>
+                </div>
+                <div class="relative mr-4">
+                     <i class="fas fa-user-circle text-gray-500 text-3xl"></i>
+                     <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 border-2 border-white"></span> </div>
+                <button onclick="cerrarSesion()" title="Cerrar Sesión" class="bg-red-600 text-white px-3 py-1.5 rounded-md shadow hover:bg-red-700 transition-all duration-200 text-sm flex items-center active:scale-95 transform hover:shadow-md">
+                    <i class="fas fa-sign-out-alt mr-1.5"></i> Salir
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-grow p-6 bg-gray-50">
+            <div id="contenido-dinamico">
+                 <div class="flex justify-center items-center h-full">
+                    <i class="fas fa-spinner fa-spin text-3xl text-teal-600"></i>
+                </div>
+            </div>
+        </main>
+
+        <button id="ai-chat-button" onclick="toggleAIChat()" title="Asistente IA" class="bg-gradient-to-br from-teal-500 to-emerald-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center active:scale-95 transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+            <i class="fas fa-robot text-2xl"></i>
+        </button>
+        <div id="ai-chat-window" class="bg-white rounded-lg shadow-xl flex flex-col overflow-hidden border border-gray-200">
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-3 flex justify-between items-center border-b border-gray-200 flex-shrink-0">
+                <h3 class="text-md font-semibold text-gray-700 flex items-center"><i class="fas fa-brain text-teal-600 mr-2"></i> Asistente IA Pedagógico</h3>
+                <button onclick="toggleAIChat()" title="Cerrar Chat" class="text-gray-400 hover:text-gray-600 transition-colors duration-200"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 bg-white">
+                 {/* Mensajes se añadirán aquí */}
+            </div>
+            <div class="p-3 border-t border-gray-200 flex-shrink-0 bg-gray-50">
+                <div class="flex space-x-2">
+                    <input type="text" id="chat-input" placeholder="Consulta pedagógica..." class="flex-grow border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500 transition duration-200">
+                    <button onclick="enviarMensajeChat()" title="Enviar Mensaje" class="bg-teal-600 text-white px-4 py-1.5 rounded-md hover:bg-teal-700 text-sm active:scale-95 transform transition-all duration-200 hover:shadow-md">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div> <script>
+        // --- Datos del Vicedirector/a ---
+        const viceDirectorData = {
+             nombre: sessionStorage.getItem("nombre") || "Priscila Blanco",
+             dni: sessionStorage.getItem("dni") || "99.999.999",
+             rol: "Vicedirectora"
+        };
+
+        // --- DATOS REALES (OFERTA Y ALUMNOS - Sin cambios) ---
+        const ofertaAcademica = [ /* ... datos oferta ... */
+            { materia: 'BIOLOGÍA', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 1 }, { materia: 'HISTORIA', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 1 }, { materia: 'GEOGRAFÍA', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 1 }, { materia: 'LENGUA Y LITERATURA', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 1 }, { materia: 'LENGUA EXTRANJERA (INGLES)', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 1 }, { materia: 'EDUCACIÓN FÍSICA', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 1 }, { materia: 'FORMACIÓN ÉTICA Y CIUDADANA', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 1 }, { materia: 'MATEMÁTICA', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 1 }, { materia: 'FÍSICO-QUÍMICA', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 1 }, { materia: 'DIBUJO TÉCNICO', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 1 }, { materia: 'TECNOLOGIA', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 1 }, { materia: 'SABERES DIGITALES', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 1 }, { materia: 'Informática (Taller)', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 1 }, { materia: 'ARQUITECTURA DE HARDWARE', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 3 }, { materia: 'LABORATORIO DE PROGRAMACIÓN', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 3 }, { materia: 'LENGUAJE DE PROGRAMACIÓN I', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 4 }, { materia: 'DISEÑO WEB', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 4 }, { materia: 'BASE DE DATOS II', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 5 }, { materia: 'DESARROLLO APLICACIONES WEB', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 5 }, { materia: 'DESARROLLO DE SOFTWARE PARA PLATAFORMAS MOVILES', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 6 }, { materia: 'PROYECTO INTEGRADOR', especialidad: 'Técnico en Programación (Res 4333/22)', anio: 6 }, { materia: 'BIOLOGÍA', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 1 }, { materia: 'HISTORIA', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 1 }, { materia: 'LENGUA', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 1 }, { materia: 'AJUSTE (Taller)', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 1 }, { materia: 'QUIMICA', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 2 }, { materia: 'ELECTRICIDAD Y ELECTRONICA (Taller)', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 2 }, { materia: 'MATEMATICA I', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 3 }, { materia: 'MAQUINAS HERRAMIENTAS (Taller)', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 3 }, { materia: 'MATERIALES Y ENSAYO', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 4 }, { materia: 'METODOS Y TECNICAS ANALITICAS E INSTRUMENTALES I', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 4 }, { materia: 'INSTRUMENTACION Y CONTROL', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 5 }, { materia: 'OPERACIÓN Y CONTROL DE PROCESOS I', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 5 }, { materia: 'METODOS Y TECNICAS ANALITICAS MICROBIOLOGICAS', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 6 }, { materia: 'PROYECTO DE EMPRENDIMIENTO PRODUCTIVO O SERVICIO', especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', anio: 6 },
+        ];
+        const alumnosEjemplo = [ /* ... datos alumnos ... */
+             { nombre: 'Alegres Erik Uriel', dni: '49.355.170', anio: 4, especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', fechaNacimiento: '3/01/2008', edad: '17 años', asistencia: '87,5%' }, { nombre: 'Blanco Augusto', dni: '49.338.059', anio: 4, especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', fechaNacimiento: '4/01/2008', edad: '17 años', asistencia: '87,5%' }, { nombre: 'Carballo Santiago Javier', dni: '49.319.661', anio: 4, especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', fechaNacimiento: '5/01/2008', edad: '17 años', asistencia: '100,0%' }, { nombre: 'Espinola Lionel Braian Nicolás', dni: '49.371.052', anio: 4, especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', fechaNacimiento: '6/01/2008', edad: '17 años', asistencia: '100,0%' }, { nombre: 'Gauna Miranda Marco', dni: '49.373.952', anio: 4, especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', fechaNacimiento: '7/01/2008', edad: '17 años', asistencia: '100,0%' }, { nombre: 'Leiva Martina Abril', dni: '49.312.133', anio: 4, especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', fechaNacimiento: '8/01/2008', edad: '17 años', asistencia: '87,5%' }, { nombre: 'Lugo Zahira Anabel', dni: '49.312.337', anio: 4, especialidad: 'Técnico en Industrias de Procesos (Res 4719/17)', fechaNacimiento: '9/01/2008', edad: '17 años', asistencia: '100,0%' },
+        ];
+
+        // --- Lógica de Simulación y Navegación ---
+        function cerrarSesion() { console.log("..."); sessionStorage.clear(); window.location.href = "index.html"; }
+        function formatFechaHora(date) { const optD={weekday:'long',year:'numeric',month:'long',day:'numeric'}; const optT={hour:'2-digit',minute:'2-digit',second:'2-digit'}; const f=date.toLocaleDateString('es-AR',optD); const h=date.toLocaleTimeString('es-AR',optT); return `${f.charAt(0).toUpperCase()+f.slice(1)}, ${h}`; }
+        function actualizarHora() { const el=document.getElementById('fecha-hora-actual'); if(el){el.textContent=formatFechaHora(new Date());} }
+        function generarNotaSimulada() { return Math.floor(Math.random() * 6) + 5; }
+
+        function mostrarContenido(seccion) {
+            const areaContenido = document.getElementById('contenido-dinamico');
+            const esInicio = seccion === 'inicio';
+            areaContenido.querySelectorAll('.fade-in-widget').forEach(el => el.classList.remove('fade-in-widget'));
+            areaContenido.innerHTML = `<div class="flex justify-center items-center py-10"><i class="fas fa-spinner fa-spin text-3xl text-teal-600"></i><span class="ml-3 text-gray-500">Cargando sección ${seccion}...</span></div>`;
+
+            setTimeout(() => {
+                let htmlContenido = '';
+                let nota;
+                switch(seccion) {
+                    case 'inicio':
+                         htmlContenido = `
+                            <h1 class="text-2xl font-semibold text-gray-800 mb-6 uppercase">PANEL PEDAGÓGICO VICEDIRECTORA ${viceDirectorData.nombre.toUpperCase()}</h1>
+                            <p class="text-gray-600 mb-8">Bienvenida, ${viceDirectorData.nombre}. Resumen del estado pedagógico.</p>
+                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                <div class="widget-card flex items-center group fade-in-widget" style="animation-delay: 0.1s;"><i class="fas fa-clipboard-check text-3xl text-blue-500 mr-4 widget-icon"></i><div><div class="text-lg font-bold text-gray-800">8</div><div class="text-sm text-gray-500">Planificaciones Pendientes</div></div></div>
+                                <div class="widget-card flex items-center group fade-in-widget" style="animation-delay: 0.2s;"><i class="fas fa-user-check text-3xl text-green-500 mr-4 widget-icon"></i><div><div class="text-lg font-bold text-gray-800">15</div><div class="text-sm text-gray-500">Alumnos en Seguimiento</div></div></div>
+                                <div class="widget-card flex items-center group fade-in-widget" style="animation-delay: 0.3s;"><i class="fas fa-lightbulb text-3xl text-yellow-500 mr-4 widget-icon"></i><div><div class="text-lg font-bold text-gray-800">4</div><div class="text-sm text-gray-500">Proyectos Activos</div></div></div>
+                                <div class="widget-card flex items-center group fade-in-widget" style="animation-delay: 0.4s;"><i class="fas fa-calendar-day text-3xl text-teal-500 mr-4 widget-icon"></i><div><div class="text-lg font-bold text-gray-800">2</div><div class="text-sm text-gray-500">Observaciones Hoy</div></div></div>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div class="lg:col-span-1 space-y-6 fade-in-widget" style="animation-delay: 0.5s;">
+                                    <div class="widget-card">
+                                        <h2 class="text-lg font-semibold text-gray-700 mb-4">Tareas Pedagógicas</h2>
+                                        <ul class="space-y-2 text-sm">
+                                            <li class="flex items-center"><i class="fas fa-clipboard text-gray-400 mr-2"></i> Revisar planificación 3°B</li>
+                                            <li class="flex items-center"><i class="fas fa-binoculars text-blue-500 mr-2"></i> Observar clase Historia 5</li>
+                                            <li class="flex items-center"><i class="fas fa-users text-yellow-500 mr-2"></i> Preparar reunión Depto. Lengua</li>
+                                            <li class="flex items-center"><i class="fas fa-chalkboard text-green-500 mr-2"></i> Feedback a docente nuevo</li>
+                                        </ul>
+                                    </div>
+                                    <div class="widget-card"><h2 class="text-lg font-semibold text-gray-700 mb-4">Accesos Rápidos</h2><div class="flex flex-wrap gap-2"><button onclick="navegarA('planificaciones')" class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full hover:bg-blue-200 active:scale-95 transform transition-all duration-200">Planificaciones</button><button onclick="navegarA('seguimiento_alumnos')" class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full hover:bg-green-200 active:scale-95 transform transition-all duration-200">Seguimiento</button><button onclick="navegarA('observaciones')" class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full hover:bg-yellow-200 active:scale-95 transform transition-all duration-200">Observaciones</button></div></div>
+                                </div>
+
+                                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 fade-in-widget" style="animation-delay: 0.6s;">
+                                    <div class="widget-card">
+                                        <h2 class="text-lg font-semibold text-gray-700 mb-4">Resumen Calificaciones</h2>
+                                        <div class="mb-4 pb-3 border-b border-gray-200">
+                                             <h3 class="text-sm font-semibold text-blue-700 mb-2">4° Año - Téc. Ind. Procesos</h3>
+                                             <div class="mini-libreta-materia"><span>LENGUA Y LITERATURA II</span> <span class="${(nota = generarNotaSimulada()) >= 7 ? 'nota-aprobada' : 'nota-desaprobada'}">${nota}</span></div>
+                                             <div class="mini-libreta-materia"><span>MATEMATICA II</span> <span class="${(nota = generarNotaSimulada()) >= 7 ? 'nota-aprobada' : 'nota-desaprobada'}">${nota}</span></div>
+                                             <div class="mini-libreta-materia"><span>QUIMICA II</span> <span class="${(nota = generarNotaSimulada()) >= 7 ? 'nota-aprobada' : 'nota-desaprobada'}">${nota}</span></div>
+                                             <div class="mini-libreta-materia"><span>MATERIALES Y ENSAYO</span> <span class="${(nota = generarNotaSimulada()) >= 7 ? 'nota-aprobada' : 'nota-desaprobada'}">${nota}</span></div>
+                                             <a href="#" onclick="navegarA('calificaciones_vista')" class="text-xs text-blue-600 hover:underline mt-2 inline-block">Ver más...</a>
+                                        </div>
+                                         <div>
+                                             <h3 class="text-sm font-semibold text-green-700 mb-2">3° Año - Téc. Programación</h3>
+                                             <div class="mini-libreta-materia"><span>LABORATORIO DE PROG.</span> <span class="${(nota = generarNotaSimulada()) >= 7 ? 'nota-aprobada' : 'nota-desaprobada'}">${nota}</span></div>
+                                             <div class="mini-libreta-materia"><span>SISTEMAS OPERATIVOS</span> <span class="${(nota = generarNotaSimulada()) >= 7 ? 'nota-aprobada' : 'nota-desaprobada'}">${nota}</span></div>
+                                             <div class="mini-libreta-materia"><span>ARQUITECTURA HARDWARE</span> <span class="${(nota = generarNotaSimulada()) >= 7 ? 'nota-aprobada' : 'nota-desaprobada'}">${nota}</span></div>
+                                             <a href="#" onclick="navegarA('calificaciones_vista')" class="text-xs text-blue-600 hover:underline mt-2 inline-block">Ver más...</a>
+                                         </div>
+                                    </div>
+                                    <div class="widget-card border-l-4 border-teal-500 flex flex-col justify-center">
+                                        <h2 class="text-lg font-semibold text-gray-700 mb-3">
+                                            Análisis Asistido <span class="ai-badge" style="background-color: var(--ai-badge-bg);">IA</span>
+                                        </h2>
+                                        <p class="text-sm text-gray-600 mb-2">IA sugiere revisar estrategias didácticas en Física de 4to año por bajo rendimiento grupal.</p>
+                                        <a href="#" onclick="navegarA('ia_pedagogica')" class="text-sm text-teal-700 hover:underline mt-auto">Ver análisis &rarr;</a>
+                                    </div>
+                                </div>
+                            </div>`;
+                         break;
+
+                    case 'oferta_academica':
+                        const especialidades = [...new Set(ofertaAcademica.map(item => item.especialidad))];
+                        htmlContenido = `<h1 class="text-2xl font-semibold text-gray-800 mb-6">Oferta Académica</h1>`;
+                        especialidades.forEach((esp, index) => {
+                            htmlContenido += `<div class="widget-card mb-6 fade-in-widget" style="animation-delay: ${index * 0.1}s;"> <h2 class="text-xl font-semibold text-emerald-800 mb-4">${esp}</h2>`;
+                            for (let anio = 1; anio <= 6; anio++) {
+                                const materiasAnio = ofertaAcademica.filter(m => m.especialidad === esp && m.anio === anio);
+                                if (materiasAnio.length > 0) {
+                                    htmlContenido += `<div class="mb-3"><h3 class="text-md font-semibold text-gray-700 mb-2">${anio}° Año</h3><ul class="list-disc list-inside text-sm text-gray-600 pl-4 space-y-1">`;
+                                    materiasAnio.forEach(m => { htmlContenido += `<li>${m.materia}</li>`; });
+                                    htmlContenido += `</ul></div>`;
+                                }
+                            }
+                            htmlContenido += `</div>`;
+                        });
+                        break;
+
+                    case 'alumnos':
+                         htmlContenido = `
+                            <h1 class="text-2xl font-semibold text-gray-800 mb-6">Gestión de Alumnos</h1>
+                            <div class="widget-card overflow-x-auto fade-in-widget">
+                                <div class="mb-4 flex flex-wrap gap-4 items-end">
+                                     <div><label for="filtro-anio" class="text-sm font-medium text-gray-700">Año:</label><select id="filtro-anio" class="mt-1 block w-full pl-3 pr-10 py-1.5 text-base border-gray-300 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md"><option>Todos</option><option>1°</option><option>2°</option><option>3°</option><option selected>4°</option><option>5°</option><option>6°</option></select></div>
+                                     <div><label for="filtro-especialidad" class="text-sm font-medium text-gray-700">Especialidad:</label><select id="filtro-especialidad" class="mt-1 block w-full pl-3 pr-10 py-1.5 text-base border-gray-300 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md"><option>Todas</option><option>Técnico en Programación (Res 4333/22)</option><option selected>Técnico en Industrias de Procesos (Res 4719/17)</option></select></div>
+                                     <button class="bg-teal-600 text-white px-4 py-1.5 rounded-md hover:bg-teal-700 text-sm active:scale-95 transform transition-all duration-200 hover:shadow-md">Filtrar</button>
+                                </div>
+                                <table class="w-full table-auto border-collapse">
+                                    <thead><tr><th>Nombre y Apellido</th><th>DNI</th><th>Año</th><th>Especialidad</th><th>Asistencia (%)</th><th>Acciones</th></tr></thead>
+                                    <tbody>`;
+                        alumnosEjemplo.forEach(alu => {
+                            if (alu.anio === 4 && alu.especialidad.includes('Industrias de Procesos')) {
+                                htmlContenido += `<tr class="hover:bg-gray-50 transition duration-150"><td>${alu.nombre}</td><td>${alu.dni}</td><td>${alu.anio}°</td><td class="text-xs">${alu.especialidad}</td><td class="${parseFloat(alu.asistencia) >= 90 ? 'text-green-600' : 'text-yellow-600'} font-medium">${alu.asistencia}</td><td><button title="Ver Detalles" class="text-blue-600 hover:text-blue-800 mr-2 active:scale-95 transform transition-all duration-150"><i class="fas fa-eye"></i></button><button title="Editar" class="text-yellow-600 hover:text-yellow-800 mr-2 active:scale-95 transform transition-all duration-150"><i class="fas fa-edit"></i></button><button title="Mensaje" class="text-purple-600 hover:text-purple-800 active:scale-95 transform transition-all duration-150"><i class="fas fa-envelope"></i></button></td></tr>`;
+                            }
+                        });
+                        htmlContenido += `</tbody></table><p class="text-xs text-gray-500 mt-4">* Mostrando alumnos de ejemplo para 4° Año - Técnico en Industrias de Procesos.</p></div>`;
+                        break;
+
+                    case 'planificaciones':
+                    case 'seguimiento_alumnos':
+                    case 'proyectos':
+                    case 'observaciones':
+                    case 'reuniones':
+                    case 'capacitaciones':
+                    case 'calificaciones_vista':
+                    case 'ia_pedagogica':
+                    case 'configuracion':
+                         htmlContenido = `<h1 class="text-2xl font-semibold text-gray-800 mb-6">${seccion.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h1> <div class="widget-card fade-in-widget"><p class="text-gray-600 mb-4">Interfaz para ${seccion.includes('ia') ? 'visualizar análisis pedagógicos avanzados' : `gestionar ${seccion.replace(/_/g, ' ')}`}.</p><div class="border border-dashed border-gray-300 rounded-md p-8 text-center text-gray-500"><i class="fas fa-tools text-3xl mb-3"></i><br>Contenido específico de la sección "${seccion}" se cargaría aquí.</div></div>`;
+                         break;
+                     default:
+                         htmlContenido = `<h1 class="text-2xl font-semibold text-gray-800">Sección Desconocida</h1><p>Contenido no encontrado para "${seccion}".</p>`;
+                 }
+                areaContenido.innerHTML = htmlContenido;
+
+                // Aplicar animación a widgets
+                areaContenido.querySelectorAll('.fade-in-widget').forEach((el, index) => {
+                    void el.offsetWidth;
+                    el.style.opacity = '0';
+                    const delay = el.style.animationDelay ? '' : `animation-delay: ${index * 0.08}s;`;
+                    el.style.animation = `fadeIn 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards ${delay}`;
+                });
+
+            }, 100);
+
+            console.log(`Mostrando contenido para: ${seccion}`);
+        }
+
+        function navegarA(seccion) { console.log(`Accediendo: ${seccion}...`); mostrarContenido(seccion); }
+
+        // --- Lógica del Chat IA ---
+        const aiChatWindow = document.getElementById('ai-chat-window');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const aiSuggestions = [
+            "Mostrar planificaciones pendientes",
+            "Alumnos con bajo rendimiento en 3°A",
+            "Sugerir actividad para proyecto STEAM",
+            "Resumen de observación de clase (Prof. López)",
+            "Próxima fecha de capacitación docente"
+        ];
+
+        function addSuggestionButtons() {
+            chatMessages.querySelectorAll('.ai-suggestion-wrapper').forEach(el => el.remove());
+            const suggestionWrapper = document.createElement('div');
+            suggestionWrapper.classList.add('ai-suggestion-wrapper', 'flex', 'flex-wrap', 'gap-2', 'mt-2', 'mb-1', 'ml-auto', 'w-full', 'justify-start');
+            suggestionWrapper.style.opacity = '0';
+            suggestionWrapper.style.animation = 'fadeIn 0.4s ease-out forwards 0.2s';
+
+            const shuffledSuggestions = aiSuggestions.sort(() => 0.5 - Math.random());
+            const suggestionsToShow = shuffledSuggestions.slice(0, 3);
+            suggestionsToShow.forEach(suggestionText => {
+                const button = document.createElement('button');
+                button.classList.add('ai-suggestion');
+                button.textContent = suggestionText;
+                button.onclick = () => {
+                    chatInput.value = suggestionText;
+                    enviarMensajeChat();
+                    suggestionWrapper.remove();
+                };
+                suggestionWrapper.appendChild(button);
+            });
+            chatMessages.appendChild(suggestionWrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function toggleAIChat() {
+            const isVisible = aiChatWindow.classList.toggle('visible');
+            if (isVisible) {
+                chatInput.focus();
+                chatMessages.innerHTML = '';
+                agregarMensaje(`¡Hola ${viceDirectorData.rol}! Soy tu asistente pedagógico. ¿En qué puedo ayudarte hoy?`, 'ai');
+                setTimeout(addSuggestionButtons, 500);
+            }
+        }
+
+        function enviarMensajeChat() {
+            const mensajeUsuario = chatInput.value.trim();
+            if (mensajeUsuario === '') return;
+             chatMessages.querySelectorAll('.ai-suggestion-wrapper').forEach(el => el.remove());
+            agregarMensaje(mensajeUsuario, 'user');
+            chatInput.value = '';
+            simularRespuestaIA(mensajeUsuario);
+        }
+
+        function agregarMensaje(texto, tipo) {
+            const divMensaje = document.createElement('div');
+            divMensaje.classList.add('chat-message', tipo === 'user' ? 'user-message' : 'ai-message');
+            divMensaje.textContent = texto;
+            divMensaje.style.opacity = '0';
+            divMensaje.style.animation = 'fadeInChatMessage 0.4s ease-out forwards';
+            chatMessages.appendChild(divMensaje);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function simularRespuestaIA(consultaUsuario) {
+            agregarMensaje("...", 'ai');
+            setTimeout(() => {
+                const typingIndicator = chatMessages.querySelector('.ai-message:last-child');
+                if (typingIndicator && typingIndicator.textContent === '...') {
+                    typingIndicator.remove();
+                }
+                let respuesta = "Procesando consulta pedagógica... ";
+                if (consultaUsuario.toLowerCase().includes("hola") || consultaUsuario.toLowerCase().includes("buenos dias")) {
+                    respuesta = `¡Hola ${viceDirectorData.rol}! ¿Cómo puedo asistirte con las tareas pedagógicas hoy?`;
+                } else if (consultaUsuario.toLowerCase().includes("planificaciones")) {
+                    respuesta = "Puedo mostrarte las planificaciones por docente, curso o estado (pendiente, aprobada). ¿Cuál prefieres ver?";
+                } else if (consultaUsuario.toLowerCase().includes("rendimiento") || consultaUsuario.toLowerCase().includes("seguimiento")) {
+                    respuesta = "Entendido. Puedo buscar alumnos por debajo de cierto promedio o con alertas de asistencia. ¿Qué criterio usamos?";
+                } else if (consultaUsuario.toLowerCase().includes("proyecto")) {
+                    respuesta = "Puedo listar los proyectos pedagógicos actuales o ayudarte a registrar uno nuevo. ¿Qué necesitas?";
+                } else if (consultaUsuario.toLowerCase().includes("gracias")) {
+                    respuesta = "Ha sido un placer ayudarte. ¡A tu disposición para cualquier otra consulta pedagógica!";
+                } else {
+                    respuesta = `Estoy analizando tu solicitud sobre "${consultaUsuario.substring(0, 20)}...". En breve te daré una respuesta o te pediré más detalles.`;
+                }
+                agregarMensaje(respuesta, 'ai');
+                setTimeout(addSuggestionButtons, 700);
+            }, 800 + Math.random() * 800);
+        }
+        chatInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { enviarMensajeChat(); } });
+
+        // --- Inicialización General ---
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.getElementById("nombreUsuarioHeader").textContent = viceDirectorData.nombre;
+            document.getElementById("dniUsuarioHeader").textContent = viceDirectorData.dni;
+            actualizarHora(); setInterval(actualizarHora, 1000);
+            mostrarContenido('inicio');
+            if (!sessionStorage.getItem("nombre")) { console.warn("..."); } else { console.log(`Sesión activa para: ${viceDirectorData.nombre}`); }
+        });
+    </script>
+</body>
+</html>

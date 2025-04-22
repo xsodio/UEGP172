@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profesor - App Demo v8</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        /* Base */
+        html, body { height: 100%; margin: 0; scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; padding-bottom: 40px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        #root { min-height: 100%; display: flex; justify-content: center; align-items: center; padding-bottom: 50px; }
+
+        /* Animations */
+        /* View Transition: Smoother Fade + Slide */
+        @keyframes viewTransition {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-view-transition { animation: viewTransition 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+        /* Fast Fade-in */
+        @keyframes fadeInFast { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in-fast { animation: fadeInFast 0.3s ease-out forwards; }
+
+        /* EET Assistant Pulse */
+        @keyframes eetPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.5); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(79, 70, 229, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+        .animate-eet-pulse { animation: eetPulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1); }
+
+        /* Bubble Pop */
+        @keyframes bubblePop {
+            0% { opacity: 0; transform: scale(0.7) translateY(10px); }
+            60% { opacity: 1; transform: scale(1.08) translateY(-2px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-bubble-pop { animation: bubblePop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        /* Loading dots */
+        @keyframes loadingDots { 0%, 80%, 100% { opacity: 0; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+        .loading-dot { animation: loadingDots 1.4s infinite ease-in-out both; }
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        /* Title slide down animation */
+        @keyframes titleSlideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-title-slide-down { animation: titleSlideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; animation-delay: 0.1s; /* Slight delay */ opacity: 0; /* Start hidden */ }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #a0aec0; border-radius: 10px; border: 2px solid #e2e8f0; }
+        ::-webkit-scrollbar-thumb:hover { background: #718096; }
+
+        /* Focus visible */
+        *:focus-visible { outline: 3px solid #a78bfa; outline-offset: 1px; border-radius: 6px; }
+
+        /* Prevent pulse on hover/focus */
+        .group:hover .animate-eet-pulse { animation: none; }
+        button:focus-visible .animate-eet-pulse { animation: none; }
+
+        /* Smooth transitions class */
+        .transition-smooth { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+        .transition-transform-smooth { transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .transition-shadow-smooth { transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-indigo-100 via-purple-100 to-blue-100 font-sans antialiased text-gray-900">
+    <div id="root">
+        <div style="display: flex; flex-direction: column; align-items: center; font-family: 'Inter', sans-serif; color: #4a5568;">
+             <div className="flex space-x-1">
+                <div className="w-3 h-3 bg-indigo-600 rounded-full loading-dot"></div>
+                <div className="w-3 h-3 bg-indigo-600 rounded-full loading-dot"></div>
+                <div className="w-3 h-3 bg-indigo-600 rounded-full loading-dot"></div>
+             </div>
+             <p style="margin-top: 15px; font-size: 1rem; font-weight: 500;">Cargando aplicación...</p>
+        </div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, Fragment } = React;
+
+        // --- Icon Placeholders ---
+        const IconPlaceholder = ({ children, className = "w-5 h-5" }) => <span className={`inline-block ${className} flex-shrink-0`} role="img" aria-hidden="true">{children || '❓'}</span>;
+        const User = () => <IconPlaceholder>👤</IconPlaceholder>; const CreditCard = () => <IconPlaceholder>💳</IconPlaceholder>; const BookUser = () => <IconPlaceholder>🧑‍🏫</IconPlaceholder>;
+        const Pencil = () => <IconPlaceholder className="w-5 h-5 sm:w-6 sm:w-6">✏️</IconPlaceholder>; const GraduationCap = () => <IconPlaceholder className="w-7 h-7 sm:w-8 sm:h-8">🎓</IconPlaceholder>; const PlusCircle = () => <IconPlaceholder className="w-4 h-4">⊕</IconPlaceholder>;
+        const XCircle = () => <IconPlaceholder className="w-4 h-4">⊗</IconPlaceholder>; const Save = () => <IconPlaceholder>💾</IconPlaceholder>; const ArrowLeft = () => <IconPlaceholder>←</IconPlaceholder>;
+        const Loader = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>;
+        const LayoutDashboard = () => <IconPlaceholder className="w-7 h-7 sm:w-8 sm:h-8">📊</IconPlaceholder>; const School = () => <IconPlaceholder>🏫</IconPlaceholder>; const Coins = () => <IconPlaceholder>🪙</IconPlaceholder>;
+        const MessageSquare = () => <IconPlaceholder className="w-6 h-6">💬</IconPlaceholder>; const BookOpen = () => <IconPlaceholder className="w-6 h-6 sm:w-7 sm:h-7">📖</IconPlaceholder>; const ClipboardCheck = () => <IconPlaceholder className="h-10 w-10 sm:h-12 sm:w-12">📋</IconPlaceholder>;
+        const Gavel = () => <IconPlaceholder className="h-10 w-10 sm:h-12 sm:w-12">⚖️</IconPlaceholder>; const Users = () => <IconPlaceholder className="h-10 w-10 sm:h-12 sm:w-12">👥</IconPlaceholder>; const ChevronRight = () => <IconPlaceholder>›</IconPlaceholder>;
+        const Bot = () => <IconPlaceholder className="w-7 h-7 transition-transform duration-300 ease-out group-hover:rotate-[15deg]">🤖</IconPlaceholder>;
+        const Send = () => <IconPlaceholder>➤</IconPlaceholder>; const Check = () => <IconPlaceholder className="w-10 h-10 sm:w-12 sm:h-12">✓</IconPlaceholder>;
+        const X = () => <IconPlaceholder className="w-6 h-6">✕</IconPlaceholder>; const CalendarDays = () => <IconPlaceholder>📅</IconPlaceholder>; const Smile = () => <IconPlaceholder className="w-4 h-4 sm:w-5 sm:h-5">😊</IconPlaceholder>;
+        const Frown = () => <IconPlaceholder className="w-4 h-4 sm:w-5 sm:h-5">☹️</IconPlaceholder>; const Meh = () => <IconPlaceholder className="w-4 h-4 sm:w-5 sm:h-5">😐</IconPlaceholder>; const CloudRain = () => <IconPlaceholder className="w-4 h-4 sm:w-5 sm:h-5">🌧️</IconPlaceholder>;
+        const Upload = () => <IconPlaceholder>⤒</IconPlaceholder>; const FileText = () => <IconPlaceholder className="w-10 h-10 sm:w-12 sm:h-12">📄</IconPlaceholder>; const Hammer = () => <IconPlaceholder>🔨</IconPlaceholder>;
+        const Sparkles = () => <IconPlaceholder className="w-6 h-6 sm:w-7 sm:h-7">✨</IconPlaceholder>;
+        const Copyright = () => <IconPlaceholder className="w-3 h-3">©</IconPlaceholder>;
+
+        // --- Hardcoded Data ---
+        const hardcodedUser = { nombre: "Cristian Melchor", dni: "39776943", rol: "docente", aniosEnsenia: "1,2,3,4", materiasDicta: "DIBUJO TÉCNICO 1° Prog,DIBUJO TÉCNICO 2° Prog,DIBUJO TÉCNICO 3° Prog", escuela: "EET UEGP Nª 172 'DEOLINDO FELIPE BITTEL' RESISTENCIA- CHACO", monedas: "1,000,000", };
+        const studentListManual = [ "Josefina Godoy", "Bianca Retamoso", "Keila Rajoy", "Medina Jair Lucas", "Garcia Juaquin Ezequiel", "De Jesus, Leonel Agustin", "Fernandez, Javier Guillermo", "Tiziano Joaquin Rajoy", "Enrique Quintana Jonathan", "Fernandez Javier", "Aguire Alexander Leonel", "Peloso Anna", "Casco Jazmin", "Valdez Sofia", "Caballero Luana", "Alfonzo Cantero Ariel", "Gauna Miranda Kiara", "Ojeda Juliana", "Zequeira Nelida", "Rios Willian", "Gomez Leandro", "Hermosi Priscila", "Barrios, Gonzalo", "Andreoli" ];
+        const materiasPorAnioData = { "1": { "Técnico en Programación (Resolución 4333/22)": ["BIOLOGÍA 1° Prog", "HISTORIA 1° Prog", "GEOGRAFÍA 1° Prog", "LENGUA Y LIT. 1° Prog", "INGLÉS 1° Prog", "ED. FÍSICA 1° Prog", "ÉTICA Y CIUD. 1° Prog", "MATEMÁTICA 1° Prog", "FÍSICO-QUÍMICA 1° Prog", "DIBUJO TÉCNICO 1° Prog", "TECNOLOGÍA 1° Prog", "SABERES DIGITALES 1° Prog", "TALLER Informática 1° Prog", "TALLER Gestión 1° Prog", "TALLER Específico 1° Prog", "TALLER STEAM 1° Prog"], "Técnico en Industrias de Procesos (RES N° 4719/17)": ["BIOLOGÍA 1° Ind", "HISTORIA 1° Ind", "GEOGRAFÍA 1° Ind", "LENGUA 1° Ind", "INGLÉS 1° Ind", "ED. FÍSICA 1° Ind", "INFORMÁTICA 1° Ind", "ÉTICA Y CIUD. 1° Ind", "MATEMÁTICA 1° Ind", "FÍSICO-QUÍMICA 1° Ind", "DIBUJO TÉCNICO 1° Ind", "TALLER Ajuste 1° Ind", "TALLER Hojalatería 1° Ind", "TALLER Carpintería 1° Ind", "TALLER Electricidad 1° Ind"] }, "2": { "Técnico en Programación (Resolución 4333/22)": ["MATEMÁTICA 2° Prog", "LENGUA Y LIT. 2° Prog", "INGLÉS 2° Prog", "ED. FÍSICA 2° Prog", "HISTORIA 2° Prog", "GEOGRAFÍA 2° Prog", "BIOLOGÍA 2° Prog", "FÍSICA 2° Prog", "QUÍMICA 2° Prog", "DIBUJO TÉCNICO 2° Prog", "SABERES DIGITALES 2° Prog", "TALLER Informática 2° Prog", "TALLER Gestión 2° Prog", "TALLER Específico 2° Prog", "TALLER STEAM 2° Prog"], }, "3": { "Técnico en Programación (Resolución 4333/22)": ["MATEMÁTICA 3° Prog", "LENGUA Y LIT. 3° Prog", "INGLÉS 3° Prog", "ED. FÍSICA 3° Prog", "HISTORIA 3° Prog", "GEOGRAFÍA 3° Prog", "BIOLOGÍA 3° Prog", "FÍSICA 3° Prog", "QUÍMICA 3° Prog", "DIBUJO TÉCNICO 3° Prog", "SABERES DIGITALES 3° Prog", "TALLER Informática 3° Prog", "TALLER Gestión 3° Prog", "TALLER Específico 3° Prog", "TALLER STEAM 3° Prog"], }, "4": { "Técnico en Programación (Resolución 4333/22)": ["MATEMÁTICA 4° Prog", "LENGUA Y LIT. 4° Prog", "INGLÉS TÉCNICO 4° Prog", "ED. FÍSICA 4° Prog", "HISTORIA 4° Prog", "GEOGRAFÍA 4° Prog", "BIOLOGÍA 4° Prog", "FÍSICA APLICADA 4° Prog", "QUÍMICA APLICADA 4° Prog", "DIBUJO TÉCNICO 4° Prog", "SIST. OPERATIVOS 4° Prog", "BASE DE DATOS 4° Prog", "PROGRAMACIÓN I 4° Prog", "LAB. DE HARDWARE 4° Prog", "LAB. DE APLICACIONES 4° Prog"], }, "5": { /* ... */ }, "6": { /* ... */ } };
+
+        // --- AI Chatbot Modal Component ---
+        const AIChatbotModal = ({ isOpen, onClose }) => {
+            const initialMessages = [ { sender: 'bot', text: '¡Hola! Soy tu asistente E.E.T. (Experto Educativo Tecnológico). ¿En qué puedo ayudarte hoy?' }, { sender: 'bot', text: 'Puedes preguntarme sobre: \n• Ideas para clases\n• Ayuda con la plataforma\n• Consultas administrativas\n• ¡Y mucho más!' } ];
+            const [messages, setMessages] = useState(initialMessages);
+            const [inputValue, setInputValue] = useState('');
+            const chatEndRef = useRef(null);
+
+            useEffect(() => { if (isOpen) { setMessages(initialMessages); setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100); } }, [isOpen]);
+            useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+            const handleSendMessage = (e) => { e.preventDefault(); if (!inputValue.trim()) return; const userMessage = { sender: 'user', text: inputValue }; const responses = [ 'Entendido. Estoy buscando información sobre eso.', 'Interesante pregunta. Permíteme procesarla.', 'Gracias por compartir. Estoy aquí para ayudarte.', 'Recibido. Dame un momento para pensar en la mejor respuesta.', 'Estoy aprendiendo constantemente, pero haré mi mejor esfuerzo para asistirte.' ]; const botResponse = { sender: 'bot', text: responses[Math.floor(Math.random() * responses.length)] }; setMessages(prev => [...prev, userMessage, botResponse]); setInputValue(''); };
+            const examplePrompts = [ "Dame ideas para una clase de Dibujo Técnico sobre proyecciones.", "¿Cómo registro una justificación de ausencia?", "Explícame cómo funciona la subasta de puntos." ];
+            const handlePromptClick = (prompt) => { setInputValue(prompt); };
+
+            if (!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-fade-in-fast">
+                    <div className="bg-gradient-to-br from-gray-100 to-indigo-100 rounded-t-2xl sm:rounded-xl shadow-2xl w-full max-w-lg h-[90vh] sm:h-auto sm:max-h-[85vh] flex flex-col overflow-hidden border border-gray-300/50">
+                        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-indigo-600 to-purple-700 text-white flex-shrink-0 shadow-lg">
+                            <div className="flex items-center gap-3"> <Bot /> <h3 className="text-lg font-semibold">Asistente E.E.T.</h3> </div>
+                            <button onClick={onClose} className="text-indigo-100 hover:text-white transition-smooth p-1 rounded-full hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50"> <X /> </button>
+                        </div>
+                        <div className="flex-grow p-4 space-y-4 overflow-y-auto bg-gray-50/50">
+                            {messages.map((msg, index) => ( <div key={index} className={`flex ${msg.sender === 'bot' ? 'justify-start' : 'justify-end'}`}> <div className={`max-w-[85%] px-4 py-2.5 rounded-xl shadow-md ${msg.sender === 'bot' ? 'bg-white border border-gray-200 text-gray-800 rounded-bl-none' : 'bg-purple-600 text-white rounded-br-none'}`}> <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p> </div> </div> ))}
+                            {messages.length <= 3 && ( <div className="pt-4 border-t border-gray-200/80 mt-4"> <p className="text-xs text-gray-500 mb-2 text-center font-medium">O prueba con un ejemplo:</p> <div className="flex flex-col sm:flex-row gap-2"> {examplePrompts.slice(0, 2).map((prompt, i) => ( <button key={i} onClick={() => handlePromptClick(prompt)} className="flex-1 text-xs text-indigo-700 bg-indigo-100 border border-indigo-200/80 rounded-full px-3 py-1.5 text-center hover:bg-indigo-200 transition-smooth duration-150 shadow-sm hover:shadow active:scale-95"> {prompt} </button> ))} </div> <button onClick={() => handlePromptClick(examplePrompts[2])} className="w-full mt-2 text-xs text-indigo-700 bg-indigo-100 border border-indigo-200/80 rounded-full px-3 py-1.5 text-center hover:bg-indigo-200 transition-smooth duration-150 shadow-sm hover:shadow active:scale-95"> {examplePrompts[2]} </button> </div> )}
+                            <div ref={chatEndRef} />
+                        </div>
+                        <form onSubmit={handleSendMessage} className="p-3 border-t border-gray-200 bg-white flex-shrink-0">
+                            <div className="flex items-center gap-2">
+                                <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Consulta a E.E.T...." className="flex-grow px-4 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition-smooth shadow-sm" />
+                                <button type="submit" className="p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 transition-smooth duration-150 transform hover:scale-110 shadow-md active:scale-100"> <Send /> </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Subject Panel Component ---
+        const SubjectPanel = ({ subjectName, onBack }) => {
+            // State declarations...
+            const [activeAction, setActiveAction] = useState('idle');
+            const [attendanceStep, setAttendanceStep] = useState('idle');
+            const [selectedAttendanceYear, setSelectedAttendanceYear] = useState(null);
+            const [studentList, setStudentList] = useState([]);
+            const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
+            const [attendanceDate, setAttendanceDate] = useState('');
+            const [planningStep, setPlanningStep] = useState('idle');
+            const [selectedPlanningYear, setSelectedPlanningYear] = useState(null);
+            const [auctionStep, setAuctionStep] = useState('idle');
+            const [auctionName, setAuctionName] = useState('');
+            const fileInputRef = useRef(null);
+
+            // Helper functions...
+            const resetAllActions = () => { setActiveAction('idle'); setAttendanceStep('idle'); setPlanningStep('idle'); setAuctionStep('idle'); setSelectedAttendanceYear(null); setSelectedPlanningYear(null); setCurrentStudentIndex(0); setStudentList([]); setAuctionName(''); };
+            const getFormattedDate = () => new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const startAttendance = () => { resetAllActions(); setActiveAction('attendance'); setAttendanceStep('selectYear'); };
+            const handleAttendanceYearSelect = (year) => { setSelectedAttendanceYear(year); setStudentList(studentListManual); setCurrentStudentIndex(0); setAttendanceDate(getFormattedDate()); setAttendanceStep('taking'); };
+            const markAttendance = (status) => { console.log(`Student: ${studentList[currentStudentIndex]}, Year: ${selectedAttendanceYear}, Status: ${status}, Date: ${attendanceDate}`); const nextIndex = currentStudentIndex + 1; if (nextIndex < studentList.length) { setCurrentStudentIndex(nextIndex); } else { setAttendanceStep('complete'); } };
+            const startPlanning = () => { resetAllActions(); setActiveAction('planning'); setPlanningStep('selectYear'); };
+            const handlePlanningYearSelect = (year) => { setSelectedPlanningYear(year); setPlanningStep('uploadFile'); };
+            const handleFileSelect = (event) => { if (event.target.files && event.target.files[0]) { console.log(`File selected for planning: ${event.target.files[0].name}, Year: ${selectedPlanningYear}`); setPlanningStep('complete'); } if(fileInputRef.current) fileInputRef.current.value = null; };
+            const startAuction = () => { resetAllActions(); setActiveAction('auction'); setAuctionStep('enterDetails'); };
+            const handleAuctionSubmit = (event) => { event.preventDefault(); if (!auctionName.trim()) return; console.log(`Starting auction for: ${auctionName}`); setAuctionStep('complete'); };
+
+            // Render Action Buttons (Idle State)
+            const renderActionButtons = () => (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6 text-center">
+                    <button onClick={startAttendance} className="group flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-100 to-blue-200 hover:from-blue-200 hover:to-blue-300 text-blue-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out border border-blue-300/50 transform hover:-translate-y-1.5 active:translate-y-0 active:scale-95"> <Users className="text-blue-600 group-hover:scale-110 transition-transform duration-300" /> <span className="font-semibold text-sm sm:text-base mt-3">Cargar Asistencia</span> </button>
+                    <button onClick={startPlanning} className="group flex flex-col items-center justify-center p-6 bg-gradient-to-br from-green-100 to-green-200 hover:from-green-200 hover:to-green-300 text-green-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out border border-green-300/50 transform hover:-translate-y-1.5 active:translate-y-0 active:scale-95"> <ClipboardCheck className="text-green-600 group-hover:scale-110 transition-transform duration-300" /> <span className="font-semibold text-sm sm:text-base mt-3">Cargar Planificaciones</span> </button>
+                    <button onClick={startAuction} className="group flex flex-col items-center justify-center p-6 bg-gradient-to-br from-yellow-100 to-yellow-200 hover:from-yellow-200 hover:to-yellow-300 text-yellow-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out border border-yellow-300/50 transform hover:-translate-y-1.5 active:translate-y-0 active:scale-95"> <Gavel className="text-yellow-600 group-hover:scale-110 transition-transform duration-300" /> <span className="font-semibold text-sm sm:text-base mt-3">Iniciar Subasta Puntos</span> </button>
+                </div>
+            );
+
+            // Render Active Action View
+            const renderActiveActionView = () => {
+                let content = null;
+                if (activeAction === 'attendance') {
+                    switch (attendanceStep) {
+                        case 'selectYear': content = ( <div className="text-center"> <h4 className="text-lg font-semibold text-gray-700 mb-5">Selecciona el Año</h4> <div className="flex justify-center gap-3 sm:gap-4 flex-wrap"> {[1, 2, 3].map(year => ( <button key={year} onClick={() => handleAttendanceYearSelect(year)} className="px-5 sm:px-6 py-2.5 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-smooth duration-150 font-medium text-sm sm:text-base transform hover:scale-105 active:scale-95"> {year}° Año </button> ))} </div> </div> ); break;
+                        case 'taking': content = ( <div> <p className="text-xs sm:text-sm text-gray-500 text-center mb-2">Alumno {currentStudentIndex + 1} / {studentList.length} ({selectedAttendanceYear}° Año)</p> <h4 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 text-center break-words p-4 bg-indigo-100 rounded-lg border border-indigo-200 shadow-sm">{studentList[currentStudentIndex]}</h4> <div className="grid grid-cols-2 sm:grid-cols-4 gap-3"> <button onClick={() => markAttendance('Presente')} className="flex items-center justify-center gap-1.5 px-3 py-3 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-smooth duration-150 text-sm sm:text-base font-medium transform hover:scale-105 active:scale-95"> <Smile /> Presente </button> <button onClick={() => markAttendance('Ausente')} className="flex items-center justify-center gap-1.5 px-3 py-3 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-smooth duration-150 text-sm sm:text-base font-medium transform hover:scale-105 active:scale-95"> <Frown /> Ausente </button> <button onClick={() => markAttendance('Justificado')} className="flex items-center justify-center gap-1.5 px-3 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-smooth duration-150 text-sm sm:text-base font-medium transform hover:scale-105 active:scale-95"> <Meh /> Justificado </button> <button onClick={() => markAttendance('Día de Lluvia')} className="flex items-center justify-center gap-1.5 px-3 py-3 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-smooth duration-150 text-sm sm:text-base font-medium transform hover:scale-105 active:scale-95"> <CloudRain /> Día Lluvia </button> </div> </div> ); break;
+                        case 'complete': content = ( <div className="p-6 bg-green-100 rounded-lg border border-green-300 text-center shadow-sm"> <Check className="text-green-600 mx-auto mb-3"/> <h4 className="text-md sm:text-lg font-semibold text-green-800 mb-2">¡Asistencia Completa!</h4> <p className="text-green-700 text-sm sm:text-base">Asistencia del {attendanceDate} guardada exitosamente.</p> <button onClick={resetAllActions} className="mt-5 px-5 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-smooth duration-150 text-sm font-medium active:scale-95"> Cerrar </button> </div> ); break;
+                    }
+                } else if (activeAction === 'planning') {
+                    switch (planningStep) {
+                        case 'selectYear': content = ( <div className="text-center"> <h4 className="text-lg font-semibold text-gray-700 mb-5">Selecciona el Año</h4> <div className="flex justify-center gap-3 sm:gap-4 flex-wrap"> {[1, 2, 3].map(year => ( <button key={year} onClick={() => handlePlanningYearSelect(year)} className="px-5 sm:px-6 py-2.5 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-smooth duration-150 font-medium text-sm sm:text-base transform hover:scale-105 active:scale-95"> {year}° Año </button> ))} </div> </div> ); break;
+                        case 'uploadFile': content = ( <div className="text-center"> <h4 className="text-lg font-semibold text-gray-700 mb-4">Cargar Planificación ({selectedPlanningYear}° Año)</h4> <p className="text-sm text-gray-600 mb-6">Selecciona el archivo PDF.</p> <label className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg shadow-md cursor-pointer hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-smooth duration-150 font-medium transform hover:scale-105 active:scale-95"> <Upload /> Seleccionar PDF <input ref={fileInputRef} type="file" accept=".pdf" onChange={handleFileSelect} className="hidden" /> </label> </div> ); break;
+                        case 'complete': content = ( <div className="p-6 bg-green-100 rounded-lg border border-green-300 text-center shadow-sm"> <FileText className="text-green-600 mx-auto mb-3"/> <h4 className="text-md sm:text-lg font-semibold text-green-800 mb-2">¡Planificación Cargada!</h4> <p className="text-green-700 text-sm sm:text-base">Archivo para {subjectName} - {selectedPlanningYear}° Año cargado.</p> <button onClick={resetAllActions} className="mt-5 px-5 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-smooth duration-150 text-sm font-medium active:scale-95"> Cerrar </button> </div> ); break;
+                    }
+                } else if (activeAction === 'auction') {
+                    switch (auctionStep) {
+                        case 'enterDetails': content = ( <form onSubmit={handleAuctionSubmit}> <h4 className="text-lg font-semibold text-gray-700 mb-5 text-center">Iniciar Subasta</h4> <div className="mb-5"> <label htmlFor="auctionName" className="block mb-1.5 text-sm font-medium text-gray-700">Nombre Examen/Actividad:</label> <input type="text" id="auctionName" value={auctionName} onChange={(e) => setAuctionName(e.target.value)} required placeholder="Ej: Examen Parcial Unidad 1" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base" /> </div> <div className="flex justify-center mt-6"> <button type="submit" className="px-6 py-2.5 bg-yellow-500 text-white rounded-lg shadow-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition-smooth duration-150 font-medium flex items-center justify-center gap-2 transform hover:scale-105 active:scale-95"> <Hammer /> Iniciar Subasta </button> </div> </form> ); break;
+                        case 'complete': content = ( <div className="p-6 bg-green-100 rounded-lg border border-green-300 text-center shadow-sm"> <Gavel className="text-green-600 mx-auto mb-3"/> <h4 className="text-md sm:text-lg font-semibold text-green-800 mb-2">¡Subasta Iniciada!</h4> <p className="text-green-700 text-sm sm:text-base">La subasta para "{auctionName}" ha comenzado.</p> <button onClick={resetAllActions} className="mt-5 px-5 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-smooth duration-150 text-sm font-medium active:scale-95"> Cerrar </button> </div> ); break;
+                    }
+                }
+
+                // Wrap intermediate steps in a styled container
+                if (content && attendanceStep !== 'complete' && planningStep !== 'complete' && auctionStep !== 'complete') {
+                    return ( <div className="mt-6 p-5 sm:p-6 bg-gray-100 rounded-xl border border-gray-200/80 animate-fade-in-fast shadow-inner"> {content} <button onClick={resetAllActions} className="mt-6 text-xs text-gray-600 hover:text-indigo-600 mx-auto block transition-colors font-medium">Cancelar Acción</button> </div> );
+                }
+                // Return completion messages directly
+                return content;
+            };
+
+            // Render Subject Panel
+            return (
+                <div className="bg-white bg-opacity-95 backdrop-blur-sm rounded-2xl shadow-xl p-4 sm:p-6 md:p-10 w-full max-w-4xl border border-gray-200/50 animate-view-transition">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-gray-300 pb-4">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3 mb-3 sm:mb-0"> <BookOpen /> <span className="break-words">{subjectName}</span> </h2>
+                        {activeAction === 'idle' && ( <button onClick={onBack} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-smooth duration-200 flex items-center justify-center gap-2 text-sm font-medium self-end sm:self-center active:scale-95"> <ArrowLeft /> Volver al Panel </button> )}
+                    </div>
+                    {activeAction === 'idle' ? renderActionButtons() : renderActiveActionView()}
+                </div>
+            );
+        };
+
+        // --- Persistent AI Assistant Component ---
+        const AsistenteEET = ({ onClick }) => {
+            const tips = [ "¿Necesitas ideas para tu próxima clase?", "Puedo ayudarte a buscar recursos.", "Pregúntame cómo registrar asistencia.", "¿Dudas sobre la plataforma?", "¡Organiza tus planificaciones!", "Puedo ayudarte a crear actividades." ];
+            const [currentTip, setCurrentTip] = useState('');
+            const [showTip, setShowTip] = useState(false);
+
+            useEffect(() => {
+                let tipIndex = Math.floor(Math.random() * tips.length);
+                setCurrentTip(tips[tipIndex]);
+                const initialTimeout = setTimeout(() => setShowTip(true), 1500);
+                const intervalId = setInterval(() => { setShowTip(false); setTimeout(() => { tipIndex = (tipIndex + 1) % tips.length; setCurrentTip(tips[tipIndex]); setShowTip(true); }, 400); }, 7000);
+                return () => { clearTimeout(initialTimeout); clearInterval(intervalId); }
+            }, []);
+
+            return (
+                <div className="fixed bottom-5 right-5 sm:bottom-8 sm:right-8 z-40 flex flex-col items-center group animate-fade-in" style={{ animationDelay: '0.5s' }}>
+                    <div className={`absolute bottom-full mb-3 w-48 sm:w-56 p-3 bg-white border border-gray-300/80 rounded-xl shadow-xl text-center transition-all duration-300 ease-out origin-bottom ${showTip ? 'opacity-100 translate-y-0 scale-100 animate-bubble-pop' : 'opacity-0 translate-y-2 scale-90 pointer-events-none'}`}>
+                        <p className="text-xs sm:text-sm text-gray-700 font-medium leading-snug">{currentTip}</p>
+                        <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-full w-3 h-3">
+                             <div className="absolute left-0 bottom-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-white drop-shadow-md"></div>
+                             <div className="absolute left-0 bottom-0 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[9px] border-t-gray-300 opacity-30 -z-10"></div>
+                        </div>
+                    </div>
+                    <button
+                        onClick={onClick}
+                        className="p-4 bg-gradient-to-br from-indigo-600 to-purple-700 text-white rounded-full shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-400 focus:ring-opacity-50 focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:scale-110 animate-eet-pulse group-hover:animate-none active:scale-100"
+                        aria-label="Abrir Asistente E.E.T."
+                    >
+                        <Bot className="w-6 h-6 sm:w-7 sm:h-7 transition-transform duration-300 ease-out group-hover:rotate-[15deg]" />
+                    </button>
+                </div>
+            );
+        };
+
+        // --- Teacher Dashboard Component ---
+        const TeacherDashboard = ({ userData, onSubjectClick, onProfileEdit }) => {
+            const { nombre, dni, rol, escuela, monedas, materiasDicta } = userData;
+            const subjects = materiasDicta?.split(',').map(m => m.trim()).filter(Boolean) || [];
+
+            return (
+                <div className="bg-white bg-opacity-95 backdrop-blur-sm rounded-2xl shadow-xl p-4 sm:p-6 md:p-10 w-full max-w-5xl border border-gray-200/50 animate-view-transition">
+                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 border-b border-gray-300 pb-4">
+                      {/* Added title animation */}
+                      <h2 className="text-3xl md:text-4xl font-bold text-gray-800 flex items-center gap-3 mb-3 sm:mb-0 animate-title-slide-down">
+                         <LayoutDashboard /> Panel del Profesor
+                      </h2>
+                       <button onClick={onProfileEdit} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-smooth duration-200 flex items-center justify-center gap-2 text-sm font-medium self-end sm:self-center active:scale-95"> <Pencil className="w-4 h-4"/> Editar Perfil </button>
+                   </div>
+                  {/* Info Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 mb-10">
+                      {[ { icon: User, title: "Información Personal", data: [ `Nombre: ${nombre}`, `DNI: ${dni}`, `Rol: ${rol}`] }, { icon: School, title: "Institución", data: [`Escuela: ${escuela || 'No asignada'}`] }, { icon: Coins, title: "Recursos", data: [`Monedas: ${monedas || '0'}`] } ].map((box, index) => (
+                        <div key={index} className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200/90 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1.5 active:scale-[0.98] active:translate-y-0">
+                            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2"> <box.icon className="text-indigo-500" />{box.title} </h3>
+                            {box.data.map((item, i) => { const [key, ...valueParts] = item.split(': '); const value = valueParts.join(': '); return ( <p key={i} className="text-gray-800 text-sm break-words mb-1"> <strong className="font-medium text-gray-600">{key}:</strong>{' '} <span className={key === 'Rol' ? 'capitalize' : ''}>{value}</span> </p> ); })}
+                        </div>
+                      ))}
+                  </div>
+                  {/* Subjects Section */}
+                  <div>
+                      <h3 className="text-xl font-semibold text-gray-800 mb-5 flex items-center gap-2"> <BookOpen className="text-purple-600"/> Tus Materias </h3>
+                      {subjects.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {subjects.map(subject => (
+                                <button key={subject} onClick={() => onSubjectClick(subject)} className="group p-4 bg-white border border-gray-300 rounded-xl shadow-md hover:shadow-lg hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1 transition-all duration-200 ease-in-out text-left flex justify-between items-center transform hover:scale-[1.03] active:scale-[1.01]">
+                                    <div>
+                                        <span className="font-semibold text-purple-800 group-hover:text-purple-600 transition-colors duration-200 text-sm sm:text-base">{subject}</span>
+                                        <span className="block text-xs text-gray-500 mt-1">Gestionar materia</span>
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-purple-600 transition-all duration-200 transform group-hover:translate-x-1" />
+                                </button>
+                            ))}
+                        </div>
+                       ) : (
+                        <p className="text-gray-500 italic p-4 bg-gray-100 rounded-lg border border-gray-200">No tienes materias asignadas actualmente.</p>
+                       )}
+                  </div>
+                </div>
+              );
+        };
+
+        // --- Main Container Component ---
+        const ProfilePage = () => {
+          // State declarations...
+          const [profileData, setProfileData] = useState({ nombre: '', dni: '', rol: '', escuela: '', monedas: '', aniosEnsenia: '', materiasDicta: '', });
+          const [aniosEnseniaSeleccionados, setAniosEnseniaSeleccionados] = useState([]);
+          const [materiasSeleccionadas, setMateriasSeleccionadas] = useState([]);
+          const [materiasPorAnio, setMateriasPorAnio] = useState({});
+          const [materiaSeleccionadaParaAgregar, setMateriaSeleccionadaParaAgregar] = useState('');
+          const [guardando, setGuardando] = useState(false);
+          const [mensaje, setMensaje] = useState('');
+          const [tipoMensaje, setTipoMensaje] = useState('');
+          const [currentView, setCurrentView] = useState('loading');
+          const [selectedSubject, setSelectedSubject] = useState(null);
+          const [showChatbot, setShowChatbot] = useState(false);
+
+          // Initial data load effect...
+          useEffect(() => {
+            if (currentView === 'loading') {
+                setMensaje('Cargando datos...'); setTipoMensaje('info');
+                const timer = setTimeout(() => {
+                     setMateriasPorAnio(materiasPorAnioData);
+                    const loadedData = { ...hardcodedUser }; setProfileData(loadedData);
+                    const initialAnios = loadedData.aniosEnsenia?.split(',').map(a => a.trim()).filter(Boolean) || [];
+                    const initialMaterias = loadedData.materiasDicta?.split(',').map(m => m.trim()).filter(Boolean) || [];
+                    setAniosEnseniaSeleccionados(initialAnios); setMateriasSeleccionadas(initialMaterias);
+                    setCurrentView('profile'); setMensaje(''); setTipoMensaje('');
+                }, 600);
+                return () => clearTimeout(timer);
+            }
+          }, []);
+
+          // Event Handlers...
+          const handleProfileInputChange = (event) => { const { name, value } = event.target; setProfileData(prevData => ({ ...prevData, [name]: value })); };
+          const handleAnioCheckboxChange = (event) => { const { value, checked } = event.target; const updatedAnios = checked ? [...aniosEnseniaSeleccionados, value].sort() : aniosEnseniaSeleccionados.filter(anio => anio !== value); setAniosEnseniaSeleccionados(updatedAnios); setProfileData(prevData => ({ ...prevData, aniosEnsenia: updatedAnios.join(',') })); setMateriaSeleccionadaParaAgregar(''); };
+          const getMateriasDisponibles = () => { const disponibles = new Set(); aniosEnseniaSeleccionados.forEach(anio => { const anioData = materiasPorAnio[anio]; if (anioData) { Object.values(anioData).forEach(listaMaterias => { listaMaterias.forEach(materia => { if (!materiasSeleccionadas.includes(materia)) { disponibles.add(materia); } }); }); } }); return Array.from(disponibles).sort(); };
+          const handleAgregarMateria = () => { if (materiaSeleccionadaParaAgregar && !materiasSeleccionadas.includes(materiaSeleccionadaParaAgregar)) { const updatedMaterias = [...materiasSeleccionadas, materiaSeleccionadaParaAgregar].sort(); setMateriasSeleccionadas(updatedMaterias); setProfileData(prevData => ({ ...prevData, materiasDicta: updatedMaterias.join(',') })); } setMateriaSeleccionadaParaAgregar(''); };
+          const handleEliminarMateria = (materiaAEliminar) => { const updatedMaterias = materiasSeleccionadas.filter(m => m !== materiaAEliminar); setMateriasSeleccionadas(updatedMaterias); setProfileData(prevData => ({ ...prevData, materiasDicta: updatedMaterias.join(',') })); };
+          const handleSubmit = async (event) => { event.preventDefault(); setGuardando(true); setMensaje('Guardando cambios...'); setTipoMensaje('info'); await new Promise(resolve => setTimeout(resolve, 1000)); const finalDataToSave = { ...profileData, aniosEnsenia: aniosEnseniaSeleccionados.join(','), materiasDicta: materiasSeleccionadas.join(',') }; setProfileData(finalDataToSave); console.log('Guardando cambios:', finalDataToSave); setMensaje('Perfil actualizado con éxito.'); setTipoMensaje('success'); setGuardando(false); setTimeout(() => { setMensaje(''); setTipoMensaje(''); setCurrentView('dashboard'); setSelectedSubject(null); }, 1200); };
+
+          // Navigation Handlers...
+          const handleSubjectClick = (subjectName) => { setSelectedSubject(subjectName); setCurrentView('subject'); };
+          const handleBackToDashboard = () => { setSelectedSubject(null); setCurrentView('dashboard'); };
+          const handleProfileEdit = () => { setCurrentView('profile'); setSelectedSubject(null); };
+          const handleVolverMenu = () => { alert("Acción 'Volver al Menú' simulada."); };
+          const handleAIChatClick = () => { setShowChatbot(true); };
+          const handleCloseChatbot = () => { setShowChatbot(false); };
+
+          // Render Logic...
+          const renderContent = () => {
+            // Use a container div with the animation class, changing the key forces re-animation
+            const animationWrapper = (content) => <div key={currentView} className="w-full">{content}</div>;
+
+            switch (currentView) {
+                case 'loading': return (
+                    <div key="loading" className="flex items-center justify-center h-screen w-screen">
+                        <div className="p-6 rounded-lg flex flex-col items-center space-y-3 bg-white shadow-xl border border-gray-200">
+                            <div className="flex space-x-1"> {/* Loading dots */}
+                                <div className="w-3 h-3 bg-indigo-600 rounded-full loading-dot"></div>
+                                <div className="w-3 h-3 bg-indigo-600 rounded-full loading-dot"></div>
+                                <div className="w-3 h-3 bg-indigo-600 rounded-full loading-dot"></div>
+                            </div>
+                            <span className="text-gray-700 font-medium text-lg">{mensaje || 'Cargando...'}</span>
+                        </div>
+                    </div>
+                 );
+                case 'dashboard': return animationWrapper( <TeacherDashboard userData={profileData} onSubjectClick={handleSubjectClick} onProfileEdit={handleProfileEdit} /> );
+                case 'subject': return animationWrapper( <SubjectPanel subjectName={selectedSubject} onBack={handleBackToDashboard} /> );
+                case 'profile': default: return animationWrapper(
+                     <div className="relative z-10 bg-gradient-to-br from-white via-gray-50 to-white bg-opacity-95 backdrop-blur-sm rounded-2xl shadow-xl p-4 sm:p-6 md:p-10 w-full max-w-4xl max-h-[95vh] overflow-y-auto border border-gray-200/80 animate-view-transition">
+                          {/* Profile Header */}
+                          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-6 sm:mb-8 text-center flex items-center justify-center gap-3 animate-title-slide-down">
+                             <GraduationCap /> Perfil del Profesor
+                          </h2>
+                          {/* Static Data Card */}
+                          <div className="datos-perfil mb-8 p-5 bg-gray-100/90 rounded-xl border border-gray-200/90 shadow-lg transition-shadow-smooth hover:shadow-xl">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-5 gap-y-6">
+                                  <div className="flex items-center text-gray-800 space-x-3"> <User className="text-indigo-500" /> <div> <strong className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</strong> <span className="text-sm sm:text-base font-medium text-gray-900">{profileData.nombre || 'N/A'}</span> </div> </div>
+                                  <div className="flex items-center text-gray-800 space-x-3"> <CreditCard className="text-indigo-500" /> <div> <strong className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">DNI</strong> <span className="text-sm sm:text-base font-medium text-gray-900">{profileData.dni || 'N/A'}</span> </div> </div>
+                                  <div className="flex items-center text-gray-800 space-x-3"> <BookUser className="text-indigo-500" /> <div> <strong className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Rol</strong> <span className="text-sm sm:text-base font-medium text-gray-900 capitalize">{profileData.rol || 'Profesor'}</span> </div> </div>
+                              </div>
+                          </div>
+                          {/* Edit Form */}
+                          <form id="formDatos" onSubmit={handleSubmit} className="space-y-7 sm:space-y-8">
+                              <h3 className="text-xl md:text-2xl font-semibold text-gray-800 mb-5 border-b border-gray-300 pb-3.5 flex items-center gap-3"> <Pencil /> Edita tus datos </h3>
+                              {/* Form fields with improved focus and transitions */}
+                              <div className="form-group"> <label htmlFor="nombreInput" className="block mb-2 text-sm font-medium text-gray-700">Nombre completo:</label> <div className="relative"> <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400"><User /></span> <input type="text" id="nombreInput" name="nombre" value={profileData.nombre} onChange={handleProfileInputChange} required className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-smooth duration-150 text-sm sm:text-base placeholder-gray-500" placeholder="Tu nombre completo" disabled={guardando} /> </div> </div>
+                              <div className="form-group"> <label htmlFor="dniInput" className="block mb-2 text-sm font-medium text-gray-700">DNI (no editable):</label> <div className="relative"> <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400"><CreditCard /></span> <input type="text" id="dniInput" name="dni" value={profileData.dni} readOnly className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg shadow-sm bg-gray-100 cursor-not-allowed text-gray-600 text-sm sm:text-base" /> </div> </div>
+                              <fieldset className="form-group space-y-3.5" disabled={guardando}> <legend className="block text-sm font-medium text-gray-700 mb-2.5">Años en los que enseña:</legend> <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3"> {Object.keys(materiasPorAnio).map(anio => ( <label key={anio} className={`flex items-center space-x-2 p-3 border border-gray-300 rounded-lg transition-smooth duration-200 cursor-pointer ${guardando ? 'bg-gray-100 cursor-not-allowed opacity-70' : 'hover:bg-indigo-100 hover:border-indigo-400 hover:shadow-md'}`}> <input type="checkbox" value={anio} checked={aniosEnseniaSeleccionados.includes(anio)} onChange={handleAnioCheckboxChange} className="form-checkbox rounded border-gray-400 text-indigo-600 focus:ring-indigo-500 h-4 w-4 disabled:opacity-50" disabled={guardando} /> <span className={`text-sm font-medium ${guardando ? 'text-gray-500' : 'text-gray-800'}`}>{anio}° Año</span> </label> ))} </div> </fieldset>
+                              <fieldset className="form-group space-y-4" disabled={guardando}> <legend className="block text-sm font-medium text-gray-700">Materias que dicta:</legend> {aniosEnseniaSeleccionados.length > 0 ? ( <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"> <div className="relative flex-grow"> <select value={materiaSeleccionadaParaAgregar} onChange={(e) => setMateriaSeleccionadaParaAgregar(e.target.value)} className="w-full pl-4 pr-10 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-smooth duration-150 text-sm sm:text-base appearance-none bg-white disabled:bg-gray-100 disabled:cursor-not-allowed" disabled={getMateriasDisponibles().length === 0 || guardando}> <option value="">-- Selecciona una materia para agregar --</option> {getMateriasDisponibles().map(materia => (<option key={materia} value={materia}>{materia}</option>))} </select> <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 pointer-events-none"> <ChevronRight /> </span> </div> <button type="button" onClick={handleAgregarMateria} disabled={!materiaSeleccionadaParaAgregar || guardando} className="w-full sm:w-auto px-5 py-2.5 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-smooth duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm font-medium transform hover:scale-105 active:scale-95"> <PlusCircle /> Agregar </button> </div> ) : (<p className="text-sm text-gray-500 italic mt-3 px-1">Selecciona al menos un año para poder agregar materias.</p>)} {materiasSeleccionadas.length > 0 && ( <div className="mt-5 space-y-2.5"> <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-1">Materias seleccionadas:</p> <ul className="flex flex-wrap gap-2.5"> {materiasSeleccionadas.map(materia => ( <li key={materia} className={`flex items-center bg-indigo-100 text-indigo-800 text-sm font-medium pl-3.5 pr-2 py-1.5 rounded-full shadow-sm transition-opacity duration-150 ${guardando ? 'opacity-70' : ''}`}> <span>{materia}</span> <button type="button" onClick={() => handleEliminarMateria(materia)} className={`ml-2 p-0.5 rounded-full text-indigo-500 transition-colors duration-150 ${guardando ? 'cursor-not-allowed hover:text-indigo-500' : 'hover:text-red-600 hover:bg-red-100/50'}`} aria-label={`Eliminar ${materia}`} disabled={guardando}> <XCircle /> </button> </li> ))} </ul> </div> )} </fieldset>
+                              {/* Action Buttons */}
+                              <div className="flex flex-col-reverse sm:flex-row justify-end gap-4 pt-7 border-t border-gray-300 mt-8">
+                                  <button type="button" onClick={handleVolverMenu} className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-smooth duration-150 flex items-center justify-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base active:scale-95"> <ArrowLeft /> Volver </button>
+                                  <button type="submit" className={`px-6 py-2.5 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-smooth duration-150 flex items-center justify-center gap-2 font-medium ${guardando ? 'opacity-70 cursor-wait' : ''} text-sm sm:text-base transform hover:scale-105 active:scale-95`} disabled={guardando}> {guardando ? <Loader /> : <Save />} {guardando ? 'Guardando...' : 'Guardar y Ver Panel'} </button>
+                              </div>
+                              {/* Feedback Message */}
+                              {mensaje && !guardando && ( <div className={`mt-5 p-4 rounded-lg text-sm transition-opacity duration-300 shadow-md ${ tipoMensaje === 'success' ? 'bg-green-100 text-green-900 border border-green-300' : (tipoMensaje === 'error' ? 'bg-red-100 text-red-900 border border-red-300' : 'bg-blue-100 text-blue-900 border border-blue-300') }`}> {mensaje} </div> )}
+                          </form>
+                     </div>
+                );
+            }
+          };
+
+          // --- Main Return for ProfilePage ---
+          return (
+            <Fragment>
+              <style>{` /* CSS Animations */ @keyframes viewTransition { from { opacity: 0; transform: translateY(10px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } } .animate-view-transition { animation: viewTransition 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; } @keyframes fadeInFast { from { opacity: 0; } to { opacity: 1; } } .animate-fade-in-fast { animation: fadeInFast 0.3s ease-out forwards; } @keyframes eetPulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.5); } 70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(79, 70, 229, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); } } .animate-eet-pulse { animation: eetPulse 2.5s infinite cubic-bezier(0.66, 0, 0, 1); } @keyframes bubblePop { 0% { opacity: 0; transform: scale(0.7) translateY(10px); } 60% { opacity: 1; transform: scale(1.08) translateY(-2px); } 100% { opacity: 1; transform: scale(1) translateY(0); } } .animate-bubble-pop { animation: bubblePop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } @keyframes loadingDots { 0%, 80%, 100% { opacity: 0; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } } .loading-dot { animation: loadingDots 1.4s infinite ease-in-out both; } .loading-dot:nth-child(1) { animation-delay: -0.32s; } .loading-dot:nth-child(2) { animation-delay: -0.16s; } @keyframes titleSlideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } .animate-title-slide-down { animation: titleSlideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; animation-delay: 0.1s; opacity: 0; } .group:hover .animate-eet-pulse { animation: none; } button:focus-visible .animate-eet-pulse { animation: none; } `}</style>
+              <div className="bg-gradient-to-br from-indigo-100 via-purple-100 to-blue-100 flex items-center justify-center min-h-screen p-2 sm:p-4 font-sans antialiased text-gray-900">
+                {renderContent()}
+              </div>
+              {/* Render Assistant and Modal outside the main content flow */}
+              {currentView !== 'loading' && <AsistenteEET onClick={handleAIChatClick} />}
+              <AIChatbotModal isOpen={showChatbot} onClose={handleCloseChatbot} />
+            </Fragment>
+          );
+        };
+
+        // --- Define the main App component ---
+        const App = () => { return <ProfilePage />; }
+
+        // --- Mount the React App to the DOM ---
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+
+    </script>
+
+    <footer class="fixed bottom-0 left-0 right-0 bg-gray-800/90 backdrop-blur-sm text-gray-300 text-xs text-center p-2 z-30 shadow-inner border-t border-gray-700/50">
+       <span class="flex items-center justify-center gap-1">
+           <Copyright /> APP de uso exclusivo EET UEGP 172 "Deolindo Felipe Bittel". Todos los derechos reservados.
+           {/* Comentario eliminado */}
+       </span>
+    </footer>
+
+</body>
+</html>

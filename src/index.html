@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ingreso al Sistema</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn { animation: fadeIn 0.5s ease-out; }
+    .video-background {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+    body {
+      margin: 0;
+      overflow: hidden;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body class="relative h-screen overflow-hidden">
+  <video autoplay muted loop class="video-background">
+    <source src="src/assets/video.mp4" type="video/mp4" />
+    Tu navegador no soporta el video.
+  </video>
+
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg w-full max-w-md animate-fadeIn relative">
+      <div class="flex justify-center mb-6">
+        <img src="src/assets/logo.png" alt="Logo" class="w-32 h-auto border-2 border-blue-500 rounded shadow-md p-1" />
+      </div>
+      <h2 class="text-2xl font-bold text-gray-700 text-center mb-4">Ingreso al Sistema</h2>
+      <form id="loginForm">
+        <div class="input-group relative mb-5">
+          <label for="dni" class="block text-sm text-gray-600 mb-1">Ingrese su DNI:</label>
+          <input type="text" id="dni" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Ejemplo: 20123456789" required />
+        </div>
+        <div class="input-group relative mb-5">
+          <label for="password" class="block text-sm text-gray-600 mb-1">Ingrese su contraseña:</label>
+          <input type="password" id="password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Ejemplo: Contraseña123" required />
+          <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-blue-500 text-xs">Mostrar</button>
+          <div id="capsLockIndicator" class="absolute left-full top-1/2 ml-2 transform -translate-y-1/2 text-red-500 text-xs hidden">¡Mayúsculas activadas!</div>
+        </div>
+        <button type="submit" class="w-full py-3 bg-blue-500 text-white rounded-lg font-semibold transition duration-300 hover:bg-blue-600">Ingresar</button>
+      </form>
+      <div id="resultado" class="mt-4 text-center text-sm text-red-500"></div>
+      <div class="text-center mt-4 text-sm">
+        <p class="text-blue-500">
+          ¿Olvidó su contraseña? <a href="mailto:Melchorcristiandaniel1@gmail.com" class="underline hover:text-blue-600">Contáctenos</a> o busque al <strong>Profesor Cristian Melchor</strong> en la escuela.
+        </p>
+      </div>
+    </div>
+
+    <div class="absolute bottom-0 w-full bg-black bg-opacity-70 text-center text-xs text-gray-300 p-2">
+      <p>
+        Creado por <strong>Prof. Cristian Melchor</strong>, DNI 39776943. Todos los derechos reservados. Para uso exclusivo en la <strong>EET UEGP N°172 Deolindo F. Bittel</strong>. Prohibida su venta o distribución. Uso gratuito.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    function togglePassword() {
+      const passwordInput = document.getElementById('password');
+      const toggleBtn = event.target;
+      passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+      toggleBtn.textContent = passwordInput.type === "text" ? "Ocultar" : "Mostrar";
+    }
+
+    document.getElementById('password').addEventListener('keyup', function (e) {
+      document.getElementById('capsLockIndicator').style.display =
+        e.getModifierState('CapsLock') ? 'block' : 'none';
+    });
+
+    const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaqnAT75Q2MjFz8QL-F0JaW45VlMnYXYu1Qwfj4Zcf6Hfvtjza01nuASYkPoYTIezlN8Vmg1JB8_2R/pub?gid=678718449&single=true&output=csv";
+
+    document.getElementById('loginForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+      const dniIngresado = document.getElementById("dni").value.trim().replace(/\./g, "").replace(/\s/g, "");
+      const claveIngresada = document.getElementById("password").value.trim();
+      const resultado = document.getElementById("resultado");
+
+      if (!dniIngresado || !claveIngresada) {
+        resultado.textContent = "❌ Completá todos los campos.";
+        return;
+      }
+
+      fetch(urlCSV)
+        .then(res => res.text())
+        .then(data => {
+          const filas = data.trim().split("\n").slice(1);
+          let encontrado = false;
+
+          for (const linea of filas) {
+            const [nombre, monedas, clave, dni, rol] = linea.split(",").map(x => x.trim().replace(/\./g, "").replace(/\s/g, ""));
+            if (dni === dniIngresado && clave === claveIngresada) {
+              sessionStorage.setItem("nombre", nombre);
+              sessionStorage.setItem("monedas", monedas);
+              sessionStorage.setItem("rol", rol);
+              window.location.href = "dashboard.html"; // Cambiar si usás otra página
+              encontrado = true;
+              break;
+            }
+          }
+
+          if (!encontrado) {
+            resultado.textContent = "❌ DNI o contraseña incorrectos.";
+          }
+        })
+        .catch(() => {
+          resultado.textContent = "❌ Error al cargar los datos.";
+        });
+    });
+  </script>
+</body>
+</html>

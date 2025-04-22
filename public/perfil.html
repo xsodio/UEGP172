@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>👨‍🏫 Perfil del Profesor - Conectado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Fondo degradado pastel institucional */
+            background: linear-gradient(to bottom, #e0f2fe, #f0f4c3);
+            min-height: 100vh; /* Asegura que el degradado cubra toda la página */
+            margin: 0; /* Elimina el margen por defecto del body */
+        }
+        #background-video {
+            display: none; /* Oculta el video de fondo */
+        }
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 0.5rem;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #9ca3af;
+            border-radius: 0.5rem;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] { -moz-appearance: textfield; }
+        .loading-message, .error-message, .info-message {
+            text-align: center;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
+        }
+        .loading-message {
+            background-color: #e0f7fa;
+            color: #067e8a;
+        }
+        .error-message {
+            background-color: #fde6e8;
+            color: #b91c1c;
+        }
+        .info-message {
+            background-color: #fff7ed;
+            color: #a0522d;
+        }
+        .form-group label {
+            font-weight: 500;
+            color: #4b5563;
+        }
+        .form-group input, .form-group select {
+            border-width: 1px;
+            border-color: #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.8rem;
+            font-size: 1rem;
+            box-shadow: inset 0 0.125rem 0.25rem rgba(0, 0, 0, 0.02);
+            transition: border-color 0.2s ease-in-out, shadow-sm 0.2s ease-in-out;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        .form-group input.readonly {
+            background-color: #f9fafb;
+            color: #6b7280;
+        }
+        .anios-checkbox-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        .anios-checkbox-container label {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            color: #4b5563;
+        }
+        .anios-checkbox-container input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            height: 1rem;
+            width: 1rem;
+            border-width: 1px;
+            border-color: #d1d5db;
+            border-radius: 0.25rem;
+            background-color: #fff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+        }
+        .anios-checkbox-container input[type="checkbox"]:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .anios-checkbox-container input[type="checkbox"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        .anios-checkbox-container input[type="checkbox"]::before {
+            content: "";
+            display: block;
+            height: 0.5rem;
+            width: 0.5rem;
+            background-color: transparent;
+            border-radius: 0.125rem;
+            transform: rotate(45deg);
+        }
+        .anios-checkbox-container input[type="checkbox"]:checked::before {
+            background-color: #fff;
+        }
+        .habilitar-materias-btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: #fff;
+            background-color: #10b981;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+            margin-top: 0.5rem;
+        }
+        .habilitar-materias-btn:hover {
+            background-color: #059669;
+            transform: translateY(-0.0625rem);
+            box-shadow: 0 0.375rem 1rem rgba(0, 0, 0, 0.1);
+        }
+        .habilitar-materias-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+        }
+        #materias-group {
+            margin-top: 1.5rem;
+        }
+        #materias-group label {
+            font-weight: 500;
+            color: #4b5563;
+        }
+        #materias_dicta {
+            background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 20 20%22 fill=%22%236b7280%22%3E%3Cpath fill-rule=%22evenodd%22 d=%22M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 011.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z%22 clip-rule=%22evenodd%22/%3E%3C/svg%3E');
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 2.5rem;
+        }
+        .confirmar-materia-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            color: #fff;
+            background-color: #14b8a6;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            flex-shrink: 0;
+            box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.08);
+            font-size: 0.875rem;
+        }
+        .confirmar-materia-btn:hover {
+            background-color: #0e766e;
+            transform: translateY(-0.0625rem);
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+        }
+        .confirmar-materia-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.3);
+        }
+        #materias-seleccionadas-container {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: #f9fafb;
+            max-height: 200px;
+            overflow-y: auto;
+            border-width: 1px;
+            border-color: #d1d5db;
+            box-shadow: inset 0 0.125rem 0.25rem rgba(0, 0, 0, 0.02);
+        }
+        #materias-seleccionadas-lista {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #materias-seleccionadas-lista li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #fff;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+            border-width: 1px;
+            border-color: #e5e7eb;
+        }
+        #materias-seleccionadas-lista li span {
+            margin-right: auto;
+            margin-left: 0.25rem;
+            color: #374151;
+            font-size: 0.9rem;
+            word-break: break-word;
+        }
+        #materias-seleccionadas-lista li button {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #fff;
+            background-color: #dc2626;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            flex-shrink: 0;
+            box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.08);
+        }
+        #materias-seleccionadas-lista li button:hover {
+            background-color: #b91c1c;
+            transform: translateY(-0.0625rem);
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+        }
+        #materias-seleccionadas-lista li button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3);
+        }
+        button[type="submit"] {
+            padding: 0.8rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            background-color: #3b82f6;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+            margin-top: 1.5rem;
+        }
+        button[type="submit"]:hover {
+            background-color: #2563eb;
+            transform: translateY(-0.0625rem);
+            box-shadow: 0 0.375rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        button[type="submit"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        .volver-menu button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: #fff;
+            background-color: #6b7280;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+            margin-top: 1rem;
+            display: inline-flex;
+            align-items: center;
+        }
+        .volver-menu button:hover {
+            background-color: #4b5563;
+            transform: translateY(-0.0625rem);
+            box-shadow: 0 0.375rem 1rem rgba(0, 0, 0, 0.1);
+        }
+        .volver-menu button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.3);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+    <video id="background-video" autoplay muted loop playsinline>
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+        Tu navegador no soporta el tag de video.
+    </video>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-semibold text-gray-800 mb-6 text-center">👨‍🏫 Perfil del Profesor</h1>
+        <form id="profesor-form" class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div id="loading-message" class="loading-message">Cargando datos del profesor...</div>
+            <div id="error-message" class="error-message" style="display: none;"></div>
+            <div id="info-message" class="info-message" style="display: none;"></div>
+            <div class="form-group mb-4">
+                <label for="legajo" class="block text-gray-700 text-sm font-bold mb-2">Legajo:</label>
+                <input type="number" id="legajo" name="legajo" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline readonly" readonly>
+            </div>
+            <div class="form-group mb-4">
+                <label for="nombre" class="block text-gray-700 text-sm font-bold mb-2">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline readonly" readonly>
+            </div>
+            <div class="form-group mb-4">
+                <label for="apellido" class="block text-gray-700 text-sm font-bold mb-2">Apellido:</label>
+                <input type="text" id="apellido" name="apellido" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline readonly" readonly>
+            </div>
+            <div class="form-group mb-4">
+                <label for="fecha_nacimiento" class="block text-gray-700 text-sm font-bold mb-2">Fecha de Nacimiento:</label>
+                <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline readonly" readonly>
+            </div>
+            <div class="form-group mb-4">
+                <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                <input type="email" id="email" name="email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="form-group mb-4">
+                <label for="telefono" class="block text-gray-700 text-sm font-bold mb-2">Teléfono:</label>
+                <input type="tel" id="telefono" name="telefono" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="form-group mb-4">
+                <label for="domicilio" class="block text-gray-700 text-sm font-bold mb-2">Domicilio:</label>
+                <input type="text" id="domicilio" name="domicilio" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="form-group mb-4">
+                <label for="anios_dictado" class="block text-gray-700 text-sm font-bold mb-2">Años Dictado:</label>
+                <div id="anios-checkbox-container" class="anios-checkbox-container">
+                    </div>
+            </div>
+            <button id="habilitar-materias-btn" type="button" class="habilitar-materias-btn">Habilitar Materias</button>
+            <div id="materias-group" class="form-group mb-4" style="display: none;">
+                <label for="materias_dicta" class="block text-gray-700 text-sm font-bold mb-2">Materias que Dicta:</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <select id="materias_dicta" name="materias_dicta" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </select>
+                    <button id="confirmar-materia-btn" type="button" class="confirmar-materia-btn">Confirmar</button>
+                </div>
+                <div id="materias-seleccionadas-container" class="mt-4">
+                    <ul id="materias-seleccionadas-lista" class="space-y-2">
+                        </ul>
+                </div>
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Guardar Cambios</button>
+        </form>
+        <div class="volver-menu text-center">
+            <button onclick="window.location.href='menu_profesor.html'" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Volver al Menú</button>
+        </div>
+    </div>
+    <script>
+        const profesorForm = document.getElementById('profesor-form');
+        const loadingMessage = document.getElementById('loading-message');
+        const errorMessage = document.getElementById('error-message');
+        const infoMessage = document.getElementById('info-message');
+        const materiasDictaSelect = document.getElementById('materias_dicta');
+        const confirmarMateriaBtn = document.getElementById('confirmar-materia-btn');
+        const materiasSeleccionadasLista = document.getElementById('materias-seleccionadas-lista');
+        const habilitarMateriasBtn = document.getElementById('habilitar-materias-btn');
+        const materiasGroup = document.getElementById('materias-group');
+        const aniosCheckboxContainer = document.getElementById('anios-checkbox-container');
+        const aniosDictadoInput = document.getElementById('anios_dictado'); // No se usa, pero se declara por si acaso
+        let materiasSeleccionadas = [];
+        let materiasDisponibles = [];
+        let profesorData;
+        const urlParams = new URLSearchParams(window.location.search);
+        const legajoProfesor = urlParams.get('legajo');
+        function mostrarMensaje(tipo, mensaje) {
+            loadingMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            infoMessage.style.display = 'none';
+            const mensajeElemento = tipo === 'error' ? errorMessage : tipo === 'info' ? infoMessage : loadingMessage;
+            mensajeElemento.textContent = mensaje;
+            mensajeElemento.style.display = 'block';
+        }
+        function cargarDatosProfesor() {
+            if (!legajoProfesor) {
+                mostrarMensaje('error', 'Legajo del profesor no proporcionado.');
+                return;
+            }
+            loadingMessage.textContent = 'Cargando datos del profesor...';
+            loadingMessage.style.display = 'block';
+            fetch(`http://localhost:3000/profesores/${legajoProfesor}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error al obtener datos del profesor: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    profesorData = data;
+                    document.getElementById('legajo').value = data.legajo;
+                    document.getElementById('nombre').value = data.nombre;
+                    document.getElementById('apellido').value = data.apellido;
+                    document.getElementById('fecha_nacimiento').value = data.fecha_nacimiento;
+                    document.getElementById('email').value = data.email;
+                    document.getElementById('telefono').value = data.telefono;
+                    document.getElementById('domicilio').value = data.domicilio;
+                    materiasSeleccionadas = data.materias_dicta || [];
+                    cargarAniosDictado(data.anios_dictado);
+                    cargarMateriasDisponibles();
+                    mostrarMensaje('info', 'Datos del profesor cargados. Puede editar la información.');
+                })
+                .catch(error => {
+                    mostrarMensaje('error', error.message);
+                });
+        }
+        function cargarAniosDictado(anios) {const aniosOptions = [1, 2, 3, 4, 5];
+            aniosOptions.forEach(anio => {
+                const checkbox = docum
