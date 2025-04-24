@@ -15,6 +15,6 @@
   status = 200
 
 [[headers]]
-  for = "/assets/*.js"
+  for = "/*.js"
   [headers.values]
     Content-Type = "application/javascript"
