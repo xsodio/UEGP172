@@ -1,0 +1,229 @@
+/* Estilos adicionales para mejorar la apariencia */
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    overflow: hidden; /* Previene la aparición de barras de desplazamiento */
+    height: 100vh;
+    display: flex; /* Para centrar el contenido vertical y horizontalmente */
+    justify-content: center;
+    align-items: center;
+    background-color: #f3f4f6; /* Color de fondo muy claro */
+}
+
+.video-background {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    min-width: 100%;
+    min-height: 100%;
+    object-fit: cover;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    filter: brightness(0.6); /* Ajustado el brillo del video */
+}
+
+.login-container {
+    width: 100%;
+    max-w: 450px; /* Aumentado el ancho máximo del contenedor */
+    background-color: rgba(255, 255, 255, 0.9); /* Ligeramente más transparente */
+    backdrop-filter: blur(12px); /* Ajustado el desenfoque */
+    border-radius: 1.25rem; /* Más redondeado */
+    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15); /* Sombra más suave y pronunciada */
+    padding: 2.5rem; /* Aumentado el padding interior */
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Borde más sutil */
+    animation: slideUpFadeIn 0.7s ease-out forwards; /* Ajustada la animación */
+}
+
+.login-title {
+    font-size: 2.25rem; /* Aumentado el tamaño del título */
+    font-weight: bold;
+    color: #444; /* Color de texto más oscuro para el título */
+    margin-bottom: 2rem; /* Aumentado el margen inferior */
+    text-align: center;
+    letter-spacing: -0.025em;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #555; /* Color de texto para las etiquetas */
+    margin-bottom: 0.75rem; /* Aumentado el margen inferior */
+    transition: color 0.2s ease; /* Transición suave para el color */
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.8rem; /* Ajustado el padding del input */
+    padding-left: 1rem;
+    padding-right: 2.5rem; /* Espacio para el icono del ojo */
+    border-radius: 0.75rem; /* Más redondeado */
+    border: 1px solid #e0e0e0; /* Borde más claro */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06); /* Sutil sombra interior */
+    font-size: 1rem; /* Aumentado el tamaño de la fuente */
+    color: #333; /* Color de texto más oscuro para el input */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Transiciones suaves */
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #3b82f6; /* Color del borde al enfocar */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); /* Sombra más pronunciada al enfocar */
+}
+
+.password-container {
+    position: relative;
+    margin-bottom: 1.5rem; /* Aumentado el margen inferior */
+}
+
+.password-toggle-button {
+    position: absolute;
+    inset-y: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    padding-right: 0.75rem; /* Ajustado el padding del botón */
+    cursor: pointer;
+    color: #777; /* Color grisáceo para el icono del ojo */
+    transition: color 0.2s ease; /* Transición suave para el color */
+}
+
+.password-toggle-button:hover {
+    color: #3b82f6; /* Color azul al pasar el mouse */
+}
+
+.caps-lock-indicator {
+    position: absolute;
+    right: 0.75rem; /* Ajustado la posición */
+    top: calc(100% + 0.5rem); /* Colocado debajo del input */
+    background-color: #fecaca;
+    color: #b91c1c;
+    padding: 0.375rem 0.75rem; /* Ajustado el padding */
+    border-radius: 0.375rem; /* Más redondeado */
+    font-size: 0.75rem; /* Ajustado el tamaño de la fuente */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Sutil sombra */
+    white-space: nowrap;
+    z-index: 10;
+}
+
+.login-button {
+    width: 100%;
+    padding: 0.8rem; /* Ajustado el padding del botón */
+    border-radius: 0.75rem; /* Más redondeado */
+    font-size: 1.125rem; /* Aumentado el tamaño de la fuente */
+    font-weight: 600; /* Negrita */
+    color: white;
+    background-image: linear-gradient(to right, #4f46e5, #6366f1); /* Gradiente más moderno */
+    box-shadow: 0 6px 12px -4px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+    transition: all 0.3s ease; /* Transiciones para todos los cambios */
+    cursor: pointer;
+    display: flex; /* Para centrar el texto y el posible icono */
+    align-items: center;
+    justify-content: center;
+}
+
+.login-button:hover {
+    background-image: linear-gradient(to right, #4338ca, #4f46e5); /* Ligeramente más oscuro al pasar el mouse */
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.18); /* Sombra más grande al pasar el mouse */
+    transform: translateY(-2px); /* Ligeramente elevado al pasar el mouse */
+}
+
+.login-button:active {
+    transform: translateY(0); /* Sin elevación al hacer clic */
+    box-shadow: 0 3px 6px -2px rgba(0, 0, 0, 0.1); /* Sombra más pequeña al hacer clic */
+}
+
+.login-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-image: linear-gradient(to right, #9ca3af, #9ca3af); /* Color grisáceo para deshabilitado */
+    box-shadow: none;
+    transform: none;
+}
+
+.audio-button {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #444;
+    background-color: #f9fafb;
+    box-shadow: 0 5px 10px -3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    border: 1px solid #e0e0e0;
+}
+
+.audio-button:hover {
+    background-color: #f3f4f6;
+    box-shadow: 0 7px 14px -3px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.audio-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 0.75rem 1rem;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            min-height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeIn 0.3s ease-out forwards, slideIn 0.3s ease-out forwards;
+        }
+        .loading-message { background-color: #e0f7fa; color: #067285; }
+        .error-message { background-color: #fee2e2; color: #991b1b; }
+        .success-message { background-color: #f0fdf4; color: #15803d; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-10px); }
+            to { transform: translateY(0); }
+        }
+
+        .forgot-password-text {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .forgot-password-link {
+            color: #3b82f6;
+            text-decoration: underline;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .forgot-password-link:hover {
+            color: #2563eb;
+        }
+
+        .creator-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            text-align: center;
+            font-size: 0.75rem;
+            color: #d1d5db;
+            padding: 0.5rem;
+        }

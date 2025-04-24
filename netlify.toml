@@ -1,16 +1,15 @@
 [build]
-  # Carpeta donde están tus funciones
   functions = "netlify/functions"
-  publish = "dist"  # o tu carpeta de salida del build
+  command = "npm install && cp -r public/* dist/ && cp index.html dist/"
+  publish = "dist"
 
 [[redirects]]
-  from = "/api/*"
+  from = "/.netlify/functions/*"
   to = "/.netlify/functions/:splat"
   status = 200
   force = true
 
-[[headers]]
-  for = "/*"
-  [headers.values]
-    # Para evitar que el navegador use versiones cacheadas
-    Cache-Control = "no-cache, no-store, must-revalidate"
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
