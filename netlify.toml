@@ -1,3 +1,24 @@
 [build]
   functions = "netlify/functions"
-  publish = "public"
+  command = "mkdir -p dist && \
+             npm install && \
+             cp -r public/* dist/ && \
+             cp index.html script.js dist/ && \
+             cp -r modules dist/"
+  publish = "dist"
+
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Content-Type = "application/javascript"

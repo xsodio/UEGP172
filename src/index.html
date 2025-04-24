@@ -65,58 +65,6 @@
     </div>
   </div>
 
-  <script>
-    function togglePassword() {
-      const passwordInput = document.getElementById('password');
-      const toggleBtn = event.target;
-      passwordInput.type = passwordInput.type === "password" ? "text" : "password";
-      toggleBtn.textContent = passwordInput.type === "text" ? "Ocultar" : "Mostrar";
-    }
-
-    document.getElementById('password').addEventListener('keyup', function (e) {
-      document.getElementById('capsLockIndicator').style.display =
-        e.getModifierState('CapsLock') ? 'block' : 'none';
-    });
-
-    const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaqnAT75Q2MjFz8QL-F0JaW45VlMnYXYu1Qwfj4Zcf6Hfvtjza01nuASYkPoYTIezlN8Vmg1JB8_2R/pub?gid=678718449&single=true&output=csv";
-
-    document.getElementById('loginForm').addEventListener('submit', function (event) {
-      event.preventDefault();
-      const dniIngresado = document.getElementById("dni").value.trim().replace(/\./g, "").replace(/\s/g, "");
-      const claveIngresada = document.getElementById("password").value.trim();
-      const resultado = document.getElementById("resultado");
-
-      if (!dniIngresado || !claveIngresada) {
-        resultado.textContent = "❌ Completá todos los campos.";
-        return;
-      }
-
-      fetch(urlCSV)
-        .then(res => res.text())
-        .then(data => {
-          const filas = data.trim().split("\n").slice(1);
-          let encontrado = false;
-
-          for (const linea of filas) {
-            const [nombre, monedas, clave, dni, rol] = linea.split(",").map(x => x.trim().replace(/\./g, "").replace(/\s/g, ""));
-            if (dni === dniIngresado && clave === claveIngresada) {
-              sessionStorage.setItem("nombre", nombre);
-              sessionStorage.setItem("monedas", monedas);
-              sessionStorage.setItem("rol", rol);
-              window.location.href = "dashboard.html"; // Cambiar si usás otra página
-              encontrado = true;
-              break;
-            }
-          }
-
-          if (!encontrado) {
-            resultado.textContent = "❌ DNI o contraseña incorrectos.";
-          }
-        })
-        .catch(() => {
-          resultado.textContent = "❌ Error al cargar los datos.";
-        });
-    });
-  </script>
+  </video>
 </body>
 </html>

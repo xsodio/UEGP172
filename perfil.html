@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>👨‍🏫 Perfil del Profesor - Conectado</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -413,6 +412,112 @@
                     mostrarMensaje('error', error.message);
                 });
         }
-        function cargarAniosDictado(anios) {const aniosOptions = [1, 2, 3, 4, 5];
+        function cargarAniosDictado(anios) {
+            const aniosOptions = [1, 2, 3, 4, 5];
             aniosOptions.forEach(anio => {
-                const checkbox = docum
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `anio-${anio}`;
+                checkbox.name = 'anios_dictado';
+                checkbox.value = anio;
+                checkbox.classList.add('shadow', 'appearance-none', 'border', 'rounded', 'w-full', 'py-2', 'px-3', 'text-gray-700', 'leading-tight', 'focus:outline-none', 'focus:shadow-outline');
+                if (anios && anios.includes(anio)) {
+                    checkbox.checked = true;
+                }
+                const label = document.createElement('label');
+                label.htmlFor = `anio-${anio}`;
+                label.textContent = anio + ' año';
+                const div = document.createElement('div');
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                aniosCheckboxContainer.appendChild(div);
+            });
+        }
+        function cargarMateriasDisponibles() {
+            fetch('http://localhost:3000/materias')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error al obtener materias: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(materias => {
+                    materiasDisponibles = materias;
+                    materias.forEach(materia => {
+                        const option = document.createElement('option');
+                        option.value = materia.id;
+                        option.textContent = materia.nombre;
+                        materiasDictaSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    mostrarMensaje('error', error.message);
+                });
+        }
+        confirmarMateriaBtn.addEventListener('click', function() {
+            const materiaId = materiasDictaSelect.value;
+            const materiaSeleccionada = materiasDisponibles.find(materia => materia.id === materiaId);
+            if (materiaSeleccionada && !materiasSeleccionadas.some(materia => materia.id === materiaId)) {
+                materiasSeleccionadas.push(materiaSeleccionada);
+                actualizarListaMaterias();
+            }
+        });
+        function actualizarListaMaterias() {
+            materiasSeleccionadasLista.innerHTML = '';
+            materiasSeleccionadas.forEach(materia => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between bg-white rounded-lg shadow-md p-4';
+                li.innerHTML = `
+                    <span>${materia.nombre}</span>
+                    <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                        Eliminar
+                    </button>
+                `;
+                li.querySelector('button').addEventListener('click', function() {
+                    materiasSeleccionadas = materiasSeleccionadas.filter(m => m.id !== materia.id);
+                    actualizarListaMaterias();
+                });
+                materiasSeleccionadasLista.appendChild(li);
+            });
+        }
+        habilitarMateriasBtn.addEventListener('click', function() {
+            materiasGroup.style.display = 'block';
+        });
+        profesorForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const telefono = document.getElementById('telefono').value;
+            const domicilio = document.getElementById('domicilio').value;
+            const aniosDictado = Array.from(document.querySelectorAll('input[name="anios_dictado"]:checked')).map(checkbox => parseInt(checkbox.value));
+            const data = {
+                legajo: profesorData.legajo,
+                nombre: profesorData.nombre,
+                apellido: profesorData.apellido,
+                fecha_nacimiento: profesorData.fecha_nacimiento,
+                email: email,
+                telefono: telefono,
+                domicilio: domicilio,
+                anios_dictado: aniosDictado,
+                materias_dicta: materiasSeleccionadas.map(materia => materia.id)
+            };
+            fetch(`http://localhost:3000/profesores/${profesorData.legajo}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error al actualizar datos del profesor: ${response.status}`);
+                }
+                mostrarMensaje('info', 'Datos del profesor actualizados correctamente.');
+            })
+            .catch(error => {
+                mostrarMensaje('error', error.message);
+            });
+        });
+        cargarDatosProfesor();
+    </script>
+</body>
+</html>
