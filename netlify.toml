@@ -1,6 +1,6 @@
 [build]
   functions = "netlify/functions"
-  command = "npm install && cp -r public/* dist/ && cp index.html dist/"
+  command = "mkdir dist && npm install && cp -r public/* dist/ && cp index.html dist/"
   publish = "dist"
 
 [[redirects]]
