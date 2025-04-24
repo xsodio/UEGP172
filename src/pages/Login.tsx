@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import * as XLSX from "xlsx";
 import logo from "../assets/LOGO.jpg";
 import "./Login.css";
 
@@ -9,78 +8,36 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [excelData, setExcelData] = useState<any[]>([]);
   const [cargando, setCargando] = useState(false);
   const navigate = useNavigate();
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const data = e.target?.result;
-        if (data) {
-          const workbook = XLSX.read(data, { type: "binary" });
-          const sheet = workbook.Sheets[workbook.SheetNames[0]];
-          const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-          const headers = jsonData[0].map((header: string) => header.trim().toLowerCase());
-          const cleanedData = jsonData.slice(1).map((row: any[]) => {
-            return row.reduce((acc, value, index) => {
-              acc[headers[index]] = value;
-              return acc;
-            }, {});
-          });
-
-          setExcelData(cleanedData);
-          console.log("📥 Excel cargado:", cleanedData);
-        }
-      };
-      reader.readAsBinaryString(file);
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setCargando(true); // Mostrar cartel de "Cargando..."
 
-    if (excelData.length === 0) {
-      setError("No se han cargado los datos del Excel. Por favor, sube el archivo Excel.");
-      return;
-    }
+    try {
+      const response = await fetch("/.netlify/functions/auth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ dni: dni.replace(/\./g, "").trim(), password: password.trim(), rol: 'alumno' }),
+      });
 
-    const userFromExcel = excelData.find((user: any) => {
-      const cleanExcelDni = (user.dni?.toString() || "").replace(/\./g, "").trim();
-      const cleanInputDni = dni.replace(/\./g, "").trim();
-      const cleanExcelPass = (user["contraseña"]?.toString() || "").trim();
-      const cleanInputPass = password.trim();
-      return cleanExcelDni === cleanInputDni && cleanExcelPass === cleanInputPass;
-    });
+      const data = await response.json();
 
-    if (userFromExcel) {
-      setCargando(true); // Mostrar cartel de "Cargando..."
-
-      const cleanedUser = Object.fromEntries(
-        Object.entries(userFromExcel).map(([key, value]) => [
-          key.trim(),
-          typeof value === "string" ? value.trim() : value,
-        ])
-      );
-
-      cleanedUser.dni = cleanedUser.dni?.toString().replace(/\./g, "").trim();
-      cleanedUser.monedas = parseInt(cleanedUser.monedas?.toString().replace(/[^\d]/g, "") || "0", 10);
-
-      console.log("✅ Usuario autenticado:");
-      console.table(cleanedUser);
-
-      localStorage.setItem("currentUser", JSON.stringify(cleanedUser));
-
-      // Simula una carga de 5 segundos antes de redirigir
-      setTimeout(() => {
+      if (response.ok) {
+        console.log("✅ Usuario autenticado:", data);
+        localStorage.setItem("currentUser", JSON.stringify(data));
         navigate("/dashboard");
-      }, 5000);
-    } else {
-      setError("Credenciales incorrectas. Intenta de nuevo.");
+      } else {
+        setError(data.error || "Credenciales incorrectas. Intenta de nuevo.");
+      }
+    } catch (error: any) {
+      setError(error.message || "Error al conectar con el servidor.");
+    } finally {
+      setCargando(false); // Ocultar cartel de "Cargando..."
     }
   };
 
@@ -139,8 +96,6 @@ const LoginPage = () => {
           </p>
         </div>
       </div>
-
-      <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} className="mt-4" />
 
       <footer className="footer">
         <p>
