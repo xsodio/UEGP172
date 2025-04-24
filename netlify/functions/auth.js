@@ -1,18 +1,55 @@
+// netlify/functions/auth.js
+const fetch = require('node-fetch');
+
 exports.handler = async (event) => {
-  const { dni, password } = JSON.parse(event.body);
-  
   try {
-    const response = await fetch(process.env.GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify({ dni, password })
-    });
-    const data = await response.json();
-    
+    // ----- 1. Leer credenciales -----
+    let { dni, password, rol } = event.body
+      ? JSON.parse(event.body)                           // POST con JSON
+      : event.httpMethod === 'GET'
+        ? event.queryStringParameters                    // GET ?dni=…&password=…
+        : {};
+
+    if (!dni || !password || !rol) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Faltan credenciales' })
+      };
+    }
+
+    // ----- 2. Consultar Airtable con tu función proxy -----
+    // OJO: si ya usas proxy-airtable esta llamada se puede fusionar.
+    const url = `${process.env.URL}/.netlify/functions/proxy-airtable?table=Usuarios`;
+    const res = await fetch(url);
+    const data = await res.json();          // [{ nombre, dni, contraseña, rol, monedas, … }]
+
+    // ----- 3. Validar usuario -----
+    const user = data.find(
+      u => u.dni === dni && u.contraseña === password && u.rol === rol
+    );
+
+    if (!user) {
+      return {
+        statusCode: 401,
+        body: JSON.stringify({ error: 'Credenciales inválidas' })
+      };
+    }
+
+    // ----- 4. Éxito -----
     return {
       statusCode: 200,
-      body: JSON.stringify(data)
+      body: JSON.stringify({
+        nombre:   user.nombre,
+        monedas:  user.monedas,
+        mensaje: `Bienvenido ${user.nombre}`
+      })
     };
-  } catch (error) {
-    return { statusCode: 500, body: JSON.stringify({ error: "Error en el servidor" }) };
+
+  } catch (err) {
+    // Errores de parseo, red, etc.
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message })
+    };
   }
 };

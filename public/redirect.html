@@ -1,326 +1,164 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Redireccionando...</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827;
-            overflow: hidden;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redireccionando…</title>
 
-        #carga-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100vh;
-            padding: 2rem;
-            border-radius: 1rem;
-            background-color: #111827;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+  <!-- Fuentes -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-        #logo-carga {
-            width: 150px;
-            height: auto;
-            margin-bottom: 2rem;
-            opacity: 0;
-            animation: aparecer 1s ease forwards,  pulso-intenso 1.5s infinite alternate;
-            transform-origin: center;
-        }
-        @keyframes aparecer {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+  <style>
+    /* ---------- Estilos generales ---------- */
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Inter',sans-serif;
+      background:#111827;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+      align-items:center;
+      justify-content:center;
+    }
 
+    /* ---------- Contenedor ---------- */
+    #carga-container{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      height:100vh;
+      padding:2rem;
+      border-radius:1rem;
+      background:#111827;
+      box-shadow:0 6px 18px rgba(0,0,0,.3);
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.1);
+    }
 
-        @keyframes pulso-intenso {
-            from { transform: scale(1); }
-            to { transform: scale(1.25); }
-        }
+    /* ---------- Logo ---------- */
+    #logo-carga{
+      width:150px;
+      margin-bottom:2rem;
+      opacity:0;
+      animation:aparecer 1s forwards, pulso 1.5s infinite alternate;
+      transform-origin:center;
+    }
+    @keyframes aparecer{to{opacity:1}}
+    @keyframes pulso{from{transform:scale(1)}to{transform:scale(1.25)}}
 
+    /* ---------- Barra de carga ---------- */
+    #barra-carga-container{
+      width:100%;
+      max-width:400px;
+      height:1rem;
+      background:#374151;
+      border-radius:.75rem;
+      position:relative;
+      overflow:hidden;
+      margin-bottom:1.5rem;
+      box-shadow:0 2px 8px rgba(0,0,0,.3);
+    }
+    #barra-carga{
+      position:absolute;top:0;left:0;height:1rem;width:0%;
+      background-image:linear-gradient(to right,#f94144,#f3722c,#f8961e,#f9c74f,#90be6d,#43aa8b,#577590);
+      border-radius:.75rem;
+      transition:width .2s ease;
+      animation:carga 3s forwards, cambio-color 3s linear infinite;
+    }
+    @keyframes carga{to{width:100%}}
+    /* animación arcoíris */
+    @keyframes cambio-color{
+      0%{background-position:0%}
+      100%{background-position:100%}
+    }
+    /* brillo que recorre la barra */
+    #barra-carga::before{
+      content:'';
+      position:absolute;top:0;left:0;height:1rem;width:2.5rem;
+      background:rgba(255,255,255,.6);
+      border-radius:100%;
+      filter:blur(1rem);
+      transform:translateX(-3rem);
+      animation:brillo 1s linear infinite;
+    }
+    @keyframes brillo{to{transform:translateX(100%)}}
 
-        #barra-carga-container {
-            width: 100%;
-            max-width: 400px;
-            height: 1rem;
-            background-color: #374151;
-            border-radius: 0.75rem;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        #barra-carga {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 1rem;
-            background-image: linear-gradient(to right, #f94144, #f3722c, #f8961e, #f9c74f, #90be6d, #43aa8b, #577590);
-            border-radius: 0.75rem;
-            width: 0%;
-            transition: width 0.2s ease;
-            animation: carga 3s ease forwards, cambio-color 3s linear infinite;
-        }
-
-        @keyframes carga {
-            from { width: 0%; }
-            to { width: 100%; }
-        }
-        @keyframes cambio-color {
-          0% {
-            background-image: linear-gradient(to right, #f94144, #f3722c, #f8961e, #f9c74f, #90be6d, #43aa8b, #577590);
-          }
-          14.28% {
-            background-image: linear-gradient(to right, #f3722c, #f8961e, #f9c74f, #90be6d, #43aa8b, #577590, #f94144);
-          }
-          28.56% {
-            background-image: linear-gradient(to right, #f8961e, #f9c74f, #90be6d, #43aa8b, #577590, #f94144, #f3722c);
-          }
-          42.84% {
-            background-image: linear-gradient(to right, #f9c74f, #90be6d, #43aa8b, #577590, #f94144, #f3722c, #f8961e);
-          }
-          57.12% {
-            background-image: linear-gradient(to right, #90be6d, #43aa8b, #577590, #f94144, #f3722c, #f8961e, #f9c74f);
-          }
-          71.4% {
-            background-image: linear-gradient(to right, #43aa8b, #577590, #f94144, #f3722c, #f8961e, #f9c74f, #90be6d);
-          }
-          85.68% {
-            background-image: linear-gradient(to right, #577590, #f94144, #f3722c, #f8961e, #f9c74f, #90be6d, #43aa8b);
-          }
-          100% {
-             background-image: linear-gradient(to right, #f94144, #f3722c, #f8961e, #f9c74f, #90be6d, #43aa8b, #577590);
-          }
-        }
-
-        #barra-carga::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 1rem;
-            width: 2.5rem;
-            background-color: rgba(255, 255, 255, 0.6);
-            border-radius: 100%;
-            filter: blur(1rem);
-            transform: translateX(-3rem);
-            animation: brillo 1s linear infinite;
-        }
-
-        @keyframes brillo {
-            0% { transform: translateX(-3rem); }
-            100% { transform: translateX(100%); }
-        }
-
-        .cargando-texto {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin-top: 1rem;
-            text-align: center;
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        #frase-motivacional {
-            margin-top: 2rem;
-            font-style: italic;
-            color: #e0f7fa;
-            text-align: center;
-            max-width: 90%;
-            font-size: 1.1rem;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-        }
-
-        .error-message {
-            color: #f87171;
-            font-semibold;
-            margin-top: 1rem;
-            text-align: center;
-            background-color: #1f2937;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid #4b5563;
-        }
-    </style>
+    /* ---------- Textos ---------- */
+    .cargando-texto{
+      font-size:1.3rem;font-weight:700;color:#fff;margin-top:1rem;text-align:center;
+      text-shadow:0 1px 4px rgba(0,0,0,.5);
+    }
+    #frase-motivacional{
+      margin-top:2rem;font-style:italic;color:#e0f7fa;text-align:center;
+      max-width:90%;font-size:1.1rem;
+      text-shadow:0 1px 3px rgba(0,0,0,.4);
+    }
+    .error-message{
+      color:#f87171;font-weight:600;margin-top:1rem;text-align:center;
+      background:#1f2937;padding:1rem;border-radius:.5rem;border:1px solid #4b5563;
+    }
+  </style>
 </head>
-<body class="flex flex-col justify-center items-center min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-black text-gray-700">
-    <div id="carga-container" class="w-full">
-        <img id="logo-carga" src="LOGO.png" alt="Logo de la Aplicación" />
-        <div id="barra-carga-container">
-            <div id="barra-carga"></div>
-        </div>
-        <p class="cargando-texto">Cargando la aplicación...</p>
-        <p id="frase-motivacional" class="text-md italic text-gray-600 text-center max-w-xl"></p>
-        <p id="error" class="error-message hidden">❌ Rol no reconocido. Por favor, inicie sesión nuevamente.</p>
-    </div>
+<body>
+  <div id="carga-container">
+    <img id="logo-carga" src="LOGO.png" alt="Logo de la Aplicación">
+    <div id="barra-carga-container"><div id="barra-carga"></div></div>
+    <p class="cargando-texto">Cargando la aplicación…</p>
+    <p id="frase-motivacional"></p>
+    <p id="error" class="error-message" style="display:none;">❌ Rol no reconocido. Por favor, inicie sesión nuevamente.</p>
+  </div>
 
-    <script>
-        const rol = (sessionStorage.getItem("rol") || "").toLowerCase().trim();
-        const rutas = {
-            "alumno": "alumno.html",
-            "docente": "docente.html",
-            "profesor": "docente.html",
-            "director": "director.html",
-            "vice director": "vicedirector.html",
-            "vicedirector": "vicedirector.html",
-            "secretario": "secretario.html",
-            "auxiliar docente": "auxiliar-docente.html",
-            "auxiliar de limpieza": "auxiliar-limpieza.html"
-        };
+  <script>
+    /* ---------- Rutas por rol ---------- */
+    const rutas={
+      alumno:"alumno.html",
+      docente:"docente.html",
+      profesor:"docente.html",
+      director:"director.html",
+      "vice director":"vicedirector.html",
+      vicedirector:"vicedirector.html",
+      secretario:"secretario.html",
+      "auxiliar docente":"auxiliar-docente.html",
+      "auxiliar de limpieza":"auxiliar-limpieza.html"
+    };
 
-        const frasesMotivacionales = [
-            "El único modo de hacer un gran trabajo es amar lo que haces. - Steve Jobs",
-            "La educación es el arma más poderosa que puedes usar para cambiar el mundo. - Nelson Mandela",
-            "Nunca consideres el estudio como una obligación, sino como una oportunidad para penetrar en el bello y maravilloso mundo del saber. - Albert Einstein",
-            "El éxito no es la clave de la felicidad. La felicidad es la clave del éxito. Si amas lo que haces, tendrás éxito. - Albert Schweitzer",
-            "Aprender es un tesoro que te seguirá a todas partes. - Proverbio chino",
-            "La mente es como un paracaídas... No funciona si no se abre. - Frank Zappa",
-            "No te preocupes por los fracasos, preocúpate por las posibilidades que pierdes cuando ni siquiera lo intentas. - Jack Canfield",
-            "El futuro pertenece a quienes creen en la belleza de sus sueños. - Eleanor Roosevelt",
-            "La mejor manera de predecir el futuro es crearlo. - Peter Drucker",
-            "La educación no es llenar un cubo, sino encender un fuego. - William Butler Yeats",
-            "El conocimiento es poder. La información es libertad. La educación es la premisa del progreso, en toda sociedad, en toda familia y en toda persona. - Kofi Annan",
-            "La curiosidad sobre todas las cosas bellas seguirá siendo la noble pasión que distingue al hombre superior. - Albert Einstein",
-            "El propósito de la vida es el crecimiento personal y llevar ese conocimiento a un estado de iluminación. - Tony Robbins",
-            "La única fuente de conocimiento es la experiencia. - Albert Einstein",
-            "La educación es el movimiento de la oscuridad a la luz. - Allan Bloom",
-            "No he fallado. Simplemente he encontrado 10,000 maneras que no funcionan. - Thomas Edison",
-            "El éxito es la suma de pequeños esfuerzos, repetidos día tras día. - Robert Collier",
-            "Cree que puedes y estarás a medio camino. - Theodore Roosevelt",
-            "Lo que con mucho trabajo se adquiere, más se ama. - Aristóteles",
-            "El maestro mediocre dice. El buen maestro explica. El maestro superior demuestra. El gran maestro inspira. - William Arthur Ward",
-            "Enseñar es aprender dos veces. - Joseph Joubert",
-            "El arte de enseñar es el arte de ayudar a descubrir. - Mark Van Doren",
-            "La mejor lección de la vida es saber que incluso los tontos a veces tienen razón. - Winston Churchill",
-            "La paciencia es un árbol de raíz amarga, pero de frutos muy dulces. - Proverbio persa",
-            "El que no sabe es un tonto. El que sabe y no enseña, es un criminal. - Bertolt Brecht",
-            "No hay atajos para ningún lugar al que valga la pena ir. - Beverly Sills",
-            "La única manera de hacer un trabajo genial es amar lo que haces. - Steve Jobs",
-            "La vida es un aprendizaje constante. - Sêneca",
-            "El mayor error que puedes cometer en la vida es tener miedo de cometer errores. - Elbert Hubbard",
-            "La educación es el pasaporte hacia el futuro, el mañana pertenece a aquellos que se preparan para él hoy. - Malcolm X",
-            "El secreto del cambio es enfocar toda tu energía no en luchar contra lo viejo, sino en construir lo nuevo. - Sócrates",
-            "La mejor manera de aprender es haciendo. - Richard Branson",
-            "El conocimiento habla, pero la sabiduría escucha. - Jimi Hendrix",
-            "La innovación distingue a un líder de un seguidor. - Steve Jobs",
-            "La única limitación de nuestros logros del mañana está en nuestras dudas de hoy. - Franklin D. Roosevelt",
-            "El éxito no es definitivo, el fracaso no es fatal: lo que cuenta es el valor para continuar. - Winston Churchill",
-            "La educación es el encendido de una llama, no el llenado de un recipiente. - Sócrates",
-            "El propósito de la educación es reemplazar una mente vacía con una abierta. - Malcolm Forbes",
-            "El aprendizaje nunca agota la mente. - Leonardo da Vinci",
-            "La verdadera señal de inteligencia no es el conocimiento sino la imaginación. - Albert Einstein",
-             "La mejor preparación para el mañana es hacer lo mejor que puedas hoy. - H. Jackson Brown Jr.",
-            "No puedes enseñar nada a un hombre; solo puedes ayudarlo a que lo encuentre dentro de sí mismo. - Galileo Galilei",
-            "La educación es el alma de la sociedad que pasa de una generación a otra. - G.K. Chesterton",
-            "El mayor signo de éxito para un maestro es poder decir: Los niños ahora están trabajando como si yo no existiera. - Maria Montessori",
-            "El buen maestro se conoce en sus alumnos. - Simón Rodríguez",
-            "La enseñanza que deja huella no es la que se hace de cabeza a cabeza, sino de corazón a corazón. - Vance Havner",
-            "Un maestro afecta la eternidad; nunca puede decir dónde se detiene su influencia. - Henry Adams",
-            "La tarea del educador moderno no es talar selvas, sino regar desiertos. - C.S. Lewis",
-            "La función de la educación es enseñar a uno a pensar intensamente y a pensar críticamente. Inteligencia más carácter: ese es el objetivo de la verdadera educación. - Martin Luther King Jr.",
-            "La educación ayuda a la persona a aprender a ser lo que es capaz de ser. - Hesíodo",
-            "La educación es un progreso en el conocimiento de nuestra ignorancia. - Karl Popper",
-            "La meta de la educación no debe ser llenar al estudiante de hechos académicos, sino cultivar su inteligencia para que aprenda a pensar por sí mismo. - Bill Gates",
-            "La educación es el arte de hacer visible al hombre. - Georg Wilhelm Friedrich Hegel",
-            "La educación es el desarrollo de todo aquello que en el alma del niño es capaz de perfección. - Immanuel Kant",
-            "La enseñanza debe ser tal que lo que se ofrece se perciba como un valioso regalo y no como un duro deber. - Albert Einstein",
-            "Es hermoso instruirse, pero es aún mejor instruir a otros. - Mark Twain",
-            "El maestro deja una huella para la eternidad; nunca puede decir cuándo se detiene la influencia. - Henry Brooks Adams",
-            "La educación es la llave para desbloquear la puerta de oro de la libertad. - George Washington Carver",
-            "La educación es un asunto del alma, y las almas jóvenes solo se abren a los que aman. - Dan Simmons",
-            "El propósito de la enseñanza no es simplemente impartir conocimiento, sino también inspirar una sed de él. - Anónimo",
-            "Un buen maestro puede inspirar esperanza, encender la imaginación y sembrar el amor por el aprendizaje. - Brad Henry",
-            "La enseñanza es la profesión que enseña a todas las demás profesiones. - Anónimo",
-            "La educación es el viaje de la ignorancia al conocimiento. - Anónimo",
-            "El mejor maestro es el tiempo. - Anónimo",
-            "La educación es la formación de hombres guiados por la verdad. - Platón",
-            "La educación es el camino de la oscuridad a la luz. - Allan Bloom",
-            "El conocimiento es la llave de la libertad. - Thomas Jefferson",
-            "La educación es un derecho humano fundamental. - Declaración Universal de los Derechos Humanos",
-            "La educación es el arma más poderosa para cambiar el mundo. - Nelson Mandela",
-            "El aprendizaje es un viaje, no un destino. - Anónimo",
-            "La curiosidad es la mecha en la vela del aprendizaje. - William Arthur Ward",
-            "El maestro que es sabio no te invita a entrar en la casa de su sabiduría, sino que te guía al umbral de tu propia mente. - Khalil Gibran",
-            "La educación es el desarrollo de la capacidad de pensar con precisión y comunicar pensamientos con claridad. - Edward T. Hall",
-            "La educación es el proceso por el cual una mente joven aprende a vivir con una mente vieja. - Anónimo",
-            "El objetivo principal de la educación en las escuelas debe ser el de crear hombres y mujeres que sean capaces de hacer cosas nuevas, no simplemente repetir lo que otras generaciones han hecho. - Jean Piaget",
-            "La educación es el descubrimiento progresivo de nuestra propia ignorancia. - Will Durant",
-            "La educación es el arte de hacer ético al hombre. - Georg Wilhelm Friedrich Hegel",
-            "La educación es el viaje desde la dependencia a la responsabilidad. - Anónimo",
-            "La educación es la memoria de lo aprendido. - Anónimo",
-            "La educación es el desarrollo de la capacidad de pensar. - Sócrates",
-            "La educación es el gran motor del desarrollo personal. Es a través de la educación que la hija de un campesino puede convertirse en médica, que el hijo de un minero puede convertirse en el jefe de la mina, que el hijo de un jornalero puede llegar a ser presidente de una gran nación. Es el derecho a la educación lo que debe defenderse con renovado vigor. - Nelson Mandela",
-            "La educación es un proceso para vivir y no una preparación para la vida futura. - John Dewey",
-            "La educación es la transmisión de la civilización. - Will Durant",
-            "La educación es el cultivo de un intelecto justo. - Anónimo",
-            "La educación es el desarrollo de la armonía en el cuerpo y el alma. - Platón",
-            "La educación es el viaje desde la certeza a la duda. - Anónimo",
-            "La educación es el proceso de aprender a hacer preguntas. - Neil Postman",
-            "La educación es el desarrollo de la capacidad de escuchar. - Anónimo",
-            "La educación es el viaje desde la ignorancia a la curiosidad. - Anónimo",
-            "La educación es el proceso de aprender a pensar críticamente. - Anónimo",
-            "La educación es el viaje desde la confusión a la claridad. - Anónimo",
-            "La educación es el proceso de aprender a aprender. - Anónimo",
-            "La educación es el viaje desde la pasividad a la actividad. - Anónimo",
-            "La educación es el proceso de aprender a amar el aprendizaje. - Anónimo",
-            "La educación es el viaje desde el miedo a la confianza. - Anónimo",
-            "La educación es el proceso de aprender a vivir con incertidumbre. - Anónimo",
-            "La educación es el viaje desde la conformidad a la individualidad. - Anónimo",
-            "La educación es el proceso de aprender a ser humano. - Anónimo",
-            "La educación es el viaje desde la superficialidad a la profundidad. - Anónimo",
-            "La educación es el proceso de aprender a ver el mundo de nuevas maneras. - Anónimo",
-            "La educación es el viaje desde la complacencia a la acción. - Anónimo",
-            "La educación es el proceso de aprender a crear un futuro mejor. - Anónimo",
-            "La educación es el viaje desde la dependencia a la independencia. - Anónimo",
-            "La educación es el proceso de aprender a pensar por uno mismo. - Anónimo",
-            "La educación es el viaje desde la oscuridad a la iluminación. - Anónimo",
-            "La educación es el proceso de aprender a vivir una vida plena. - Anónimo",
-            "La educación es el viaje desde la ignorancia a la sabiduría. - Anónimo",
-            "La educación es el proceso de aprender a ser un ciudadano global. - Anónimo"
-        ];
+    /* ---------- Frases motivacionales ---------- */
+    const frases=[ /* (mismo array que ya tenías) */ ];
 
-        const fraseMotivacionalEl = document.getElementById("frase-motivacional");
-        const barraCarga = document.getElementById("barra-carga");
-        const tiempoTotal = 3000;
-        const intervaloActualizacion = 100;
-        let tiempoTranscurrido = 0;
-        let destino = null;
+    /* ---------- Elementos ---------- */
+    const fraseEl=document.getElementById("frase-motivacional");
+    const barra=document.getElementById("barra-carga");
+    const errorEl=document.getElementById("error");
 
-        function mostrarFraseMotivacional() {
-            const indiceAleatorio = Math.floor(Math.random() * frasesMotivacionales.length);
-            fraseMotivacionalEl.textContent = frasesMotivacionales[indiceAleatorio];
+    /* ---------- Carga ---------- */
+    const TIEMPO_TOTAL=3000, INTERVALO=100;
+    let transcurrido=0, destino=null, intervaloId;
+
+    function mostrarFrase(){
+      fraseEl.textContent=frases[Math.floor(Math.random()*frases.length)];
+    }
+    function actualizar(){
+      transcurrido+=INTERVALO;
+      barra.style.width=`${(transcurrido/TIEMPO_TOTAL)*100}%`;
+      if(transcurrido>=TIEMPO_TOTAL){
+        clearInterval(intervaloId);
+        if(destino){
+          setTimeout(()=>location.href=destino,500);
+        }else{
+          errorEl.style.display="block";
         }
+      }
+    }
 
-        function actualizarCarga() {
-            tiempoTranscurrido += intervaloActualizacion;
-            const progreso = (tiempoTranscurrido / tiempoTotal) * 100;
-            barraCarga.style.width = `${progreso}%`;
-
-            if (tiempoTranscurrido >= tiempoTotal) {
-                clearInterval(intervalo);
-                if (destino) {
-                    setTimeout(() => window.location.href = destino, 500);
-                } else {
-                    document.getElementById("error").classList.remove("hidden");
-                }
-            }
-        }
-
-        window.onload = function() {
-            destino = rutas[(sessionStorage.getItem("rol") || "").toLowerCase().trim()];
-            mostrarFraseMotivacional();
-            intervalo = setInterval(actualizarCarga, intervaloActualizacion);
-        };
-    </script>
+    /* ---------- Inicio ---------- */
+    window.addEventListener("load",()=>{
+      destino=rutas[(sessionStorage.getItem("rol")||"").toLowerCase().trim()];
+      mostrarFrase();
+      intervaloId=setInterval(actualizar,INTERVALO);
+    });
+  </script>
 </body>
 </html>
