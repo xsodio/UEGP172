@@ -1,55 +1,20 @@
-// netlify/functions/auth.js
-const fetch = require('node-fetch');
-
 exports.handler = async (event) => {
   try {
-    // ----- 1. Leer credenciales -----
-    let { dni, password, rol } = event.body
-      ? JSON.parse(event.body)                           // POST con JSON
-      : event.httpMethod === 'GET'
-        ? event.queryStringParameters                    // GET ?dni=…&password=…
-        : {};
+    // Si no hay body o viene vacío, lo convertimos en un objeto vacío
+    const body = event.body ? JSON.parse(event.body) : {};
 
-    if (!dni || !password || !rol) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Faltan credenciales' })
-      };
-    }
+    /* ----- tu lógica de autenticación ----- */
+    // const { dni, password, rol } = body;
 
-    // ----- 2. Consultar Airtable con tu función proxy -----
-    // OJO: si ya usas proxy-airtable esta llamada se puede fusionar.
-    const url = `${process.env.URL}/.netlify/functions/proxy-airtable?table=Usuarios`;
-    const res = await fetch(url);
-    const data = await res.json();          // [{ nombre, dni, contraseña, rol, monedas, … }]
-
-    // ----- 3. Validar usuario -----
-    const user = data.find(
-      u => u.dni === dni && u.contraseña === password && u.rol === rol
-    );
-
-    if (!user) {
-      return {
-        statusCode: 401,
-        body: JSON.stringify({ error: 'Credenciales inválidas' })
-      };
-    }
-
-    // ----- 4. Éxito -----
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        nombre:   user.nombre,
-        monedas:  user.monedas,
-        mensaje: `Bienvenido ${user.nombre}`
-      })
+      body: JSON.stringify({ ok: true })
     };
-
   } catch (err) {
-    // Errores de parseo, red, etc.
+    // Si el body no es un JSON válido, devolver un error 400 con el mensaje
     return {
-      statusCode: 500,
-      body: JSON.stringify({ error: err.message })
+      statusCode: 400,
+      body: JSON.stringify({ error: "Invalid JSON format" })
     };
   }
 };
