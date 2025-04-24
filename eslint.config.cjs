@@ -1,10 +1,17 @@
 module.exports = {
-  root: true,
-  extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-    'plugin:@typescript-eslint/recommended',
+  [
+    {
+      ...require('eslint-config-eslint').configs.recommended,
+    }
+    {
+      ...require('eslint-plugin-react').configs.recommended,
+    },
+    {
+      ...require('eslint-plugin-react-hooks').configs.recommended,
+    },
+    {
+      ...require('@typescript-eslint/eslint-plugin').configs.recommended,
+    },
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -17,7 +24,7 @@ module.exports = {
   plugins: ['react', 'react-hooks', '@typescript-eslint'],
   rules: {
     'react/prop-types': 'off',
-    '@typescript-eslint/no-unused-vars': ['warn'],
+    '@typescript-eslint/no-unused-vars': ['error'],
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
   },

@@ -1,3 +1,21 @@
 {
-	"siteId": "1d8acf04-b356-451b-906a-eae126cad4b6"
+	"siteId": "1d8acf04-b356-451b-906a-eae126cad4b6",
+	"geolocation": {
+		"data": {
+			"city": "Barranqueras",
+			"country": {
+				"code": "AR",
+				"name": "Argentina"
+			},
+			"subdivision": {
+				"code": "H",
+				"name": "Chaco"
+			},
+			"timezone": "America/Argentina/Cordoba",
+			"latitude": -27.4799,
+			"longitude": -58.9393,
+			"postalCode": "3503"
+		},
+		"timestamp": 1745515346824
+	}
 }
